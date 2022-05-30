@@ -1,3 +1,5 @@
+*Add proper Tatobea support
+
 *Maybe mark the hardest word in bold and give it a higher weight?
 
 *Add a proper lemmatizer
@@ -6,7 +8,9 @@
 
 *Create a Czech-German dictionary from the german Wiktionary HTML dump
 
-*Include interactive dictionary lookup (loading data from a TSV dictionary)
+*Include interactive dictionary lookup (loading data from a TSV/JSON/Tabfile dictionary, dictionary loading taken from pyglossary)
+*https://developer.mozilla.org/de/docs/Web/HTML/Element/details -> Use the details element
+
 
 *Find a way to reduce the number of sentences (not a problem for Czech-German, but for other languages surely)
 
@@ -17,5 +21,6 @@
 *Escape html fields
 
 *At the end create a shared Google Docs document about how to learn Czech efficiently
+
 
 *When finished, promote

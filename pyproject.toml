@@ -10,6 +10,7 @@ wordfreq = "*"
 genanki = "*"
 gTTS = "*"
 pandas = "*"
+pyglossary = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

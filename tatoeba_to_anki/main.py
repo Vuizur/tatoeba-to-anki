@@ -30,27 +30,6 @@ def get_sentence_word_frequency(sentence:str) -> float:
         sentence_length_log = math.log(sentence_length)
     return avgfreq - sentence_length_log
 
-#def strings_are_extremely_similar(string1:str, string2:str) -> bool:
-#    """
-#    Sometimes there are two sentences that are very similar, usually because of different versions for different genders.
-#    We want to drop one of them.
-#    """
-#    # Return false if the difference of string lengths is more than 2
-#    if abs(len(string1) - len(string2)) > 2:
-#        return False
-#    # Return false if number of words is different
-#    if len(string1.split()) != len(string2.split()):
-#        return False
-#       
-#    diff_count = 0
-#    for i in range(len(string1)):
-#        if string1[i] != string2[i]:
-#            diff_count += 1
-#            if diff_count > 2:
-#                return False
-#    return True
-
-
 def czech_strings_are_very_similar(string1:str, string2:str) -> bool:
     
     # Return True if only the punctuation (.,:;!) is different

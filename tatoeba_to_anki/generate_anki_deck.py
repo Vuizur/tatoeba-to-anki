@@ -1,5 +1,32 @@
 import genanki
 import pandas as pd
+from pyglossary import Glossary
+
+
+class DefinitionGenerator:
+    """Generates an HTML string containing the detailed definitions of the words in a sentence.
+
+    At initialization takes a dictionary parseable by pyglossary and converts it to a tab-separated file,
+    which is then used to look up the definitions of the words in the sentence."""
+
+    def convert_dictionary_to_tabfile(self) -> None:
+        """Converts the dictionary to a tab-separated file"""
+        glos = Glossary()
+        glos.convert(
+            self.dictionary_path,
+            self.input_format,
+            outputFilename=self.intermediate_tabfile_path,
+            outputFormat="tsv",
+        )
+
+    def __init__(
+        self, dictionary_path, input_format, intermediate_tabfile_path="temp.tsv"
+    ) -> None:
+
+        self.dictionary_path = dictionary_path
+        self.input_format = input_format
+        self.intermediate_tabfile_path = intermediate_tabfile_path
+        self.convert_dictionary_to_tabfile()
 
 
 def generate_anki_deck(
@@ -36,7 +63,7 @@ def generate_anki_deck(
         templates=[
             {
                 "name": "Card 1",
-                "qfmt": "{{Question}}<br>{{MyMedia}}", 
+                "qfmt": "{{Question}}<br>{{MyMedia}}",
                 "afmt": '{{FrontSide}}<hr id="answer">{{Answer}}',
             },
         ],
@@ -66,6 +93,7 @@ def generate_anki_deck(
         deck.add_note(note)
 
     package.write_to_file(deck_filename)
+
 
 if __name__ == "__main__":
     generate_anki_deck(

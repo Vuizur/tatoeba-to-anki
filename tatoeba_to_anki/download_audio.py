@@ -7,7 +7,6 @@ from gtts import gTTS
 
 SENTENCES_WITH_AUDIO_PATH = "sentences_with_audio.tsv"
 
-
 def get_sentences_with_audio(sentences_with_audio_path) -> set[str]:
     sentences_with_audio = set()
     with open(sentences_with_audio_path, "r", encoding="utf-8") as f:
@@ -15,13 +14,6 @@ def get_sentences_with_audio(sentences_with_audio_path) -> set[str]:
         for row in reader:
             sentences_with_audio.add(row[0])
     return sentences_with_audio
-
-
-def download_audio(sentence_id, sentence, language):
-    """
-    Download the audio file for the given sentence.
-    """
-
 
 class AudioDownloader:
     def __init__(
