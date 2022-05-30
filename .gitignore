@@ -1,0 +1,8 @@
+audio_files/
+Satzpaare Tschechisch-Deutsch - 2022-05-30.tsv
+sentences_with_audio.tar.bz2
+sentences_with_audio.tsv
+poetry.lock
+sorted_sentences.tsv
+tschechisch_deutsch_deck.apkg
+tatoeba_to_anki/__pycache__/

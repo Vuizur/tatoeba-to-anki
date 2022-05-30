@@ -1,0 +1,21 @@
+*Maybe mark the hardest word in bold and give it a higher weight?
+
+*Add a proper lemmatizer
+
+*Don't add that many cards for the same "hardest" bolded word
+
+*Create a Czech-German dictionary from the german Wiktionary HTML dump
+
+*Include interactive dictionary lookup (loading data from a TSV dictionary)
+
+*Find a way to reduce the number of sentences (not a problem for Czech-German, but for other languages surely)
+
+*Filter out names out of the sentence difficulty calculation?
+
+*Give higher weight to the rarest word?
+
+*Escape html fields
+
+*At the end create a shared Google Docs document about how to learn Czech efficiently
+
+*When finished, promote
