@@ -16,6 +16,7 @@ pyglossary = "*"
 pytest = "^5.2"
 mypy = "*"
 black = {version = "^22.3.0", allow-prereleases = true}
+types-requests = "*"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -13,7 +13,7 @@ It has been tested for Czech-German, but probably also works for other languages
 First you need to get the data: Go to https://tatoeba.org/en/downloads, download the desired sentence pairs.
 
 Then should clone the project, install poetry and then run `poetry install`. 
-Move the sentence pair files into the root folder.
+Move the sentence pair files into the root folder and edit constants in `main.py` to reflect the names of the downloaded files
 
 Then run `poetry run python ./tatoeba_to_anki/main.py` to sort the files, remove duplicates, and download the audio.
 After that run `poetry run python ./tatoeba_to_anki/generate_anki_deck.py` to generate the Anki deck.
@@ -24,3 +24,5 @@ I plan on adding more features, you can open an issue if you think something sho
 * This [project for generating Swedish cards](https://github.com/vvpd/anki_swedish) is pretty sophisticated and is probably worth understanding more fully
 
 * [Sentence pairs](https://github.com/kmicklas/sentence-pairs) is a pretty simple package which has given me the idea of using the wordfreq package
+
+* Older solutions such as [Tatoeba-Ankigeneration](https://github.com/alexanderk409/Tatoeba-anki-deckgeneration) scrape parts of the site by themselves, but that should not be necessary anymore with the new downloadable data
