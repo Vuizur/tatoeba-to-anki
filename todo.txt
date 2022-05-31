@@ -1,4 +1,4 @@
-*Add proper Tatobea support
+*Add proper Tatobea audio support
 
 *Maybe mark the hardest word in bold and give it a higher weight?
 
@@ -11,7 +11,6 @@
 *Include interactive dictionary lookup (loading data from a TSV/JSON/Tabfile dictionary, dictionary loading taken from pyglossary)
 *https://developer.mozilla.org/de/docs/Web/HTML/Element/details -> Use the details element
 
-
 *Find a way to reduce the number of sentences (not a problem for Czech-German, but for other languages surely)
 
 *Filter out names out of the sentence difficulty calculation?
@@ -21,6 +20,5 @@
 *Escape html fields
 
 *At the end create a shared Google Docs document about how to learn Czech efficiently
-
 
 *When finished, promote
