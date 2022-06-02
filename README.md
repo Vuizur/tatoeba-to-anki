@@ -1,5 +1,8 @@
 # Tatoeba to Anki sentence pair flash card creator
 
+Screenhot:
+![Screenshot](https://raw.githubusercontent.com/tatoeba/tatoeba-to-anki/master/img/anki_screenshot.png.png){width:70%;}
+
 This project creates Anki flashcards from a Tatoeba language pair, ordering the cards by difficulty and downloading audio from Google-Text-To-Speech to integrate directly into the deck.
 
 The ordering algorithm takes the average frequency of each sentence and sentence length into account.
