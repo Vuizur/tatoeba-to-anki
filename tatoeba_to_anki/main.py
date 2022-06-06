@@ -86,7 +86,8 @@ def generate_ordered_sentences_tsv():
 
 if __name__ == "__main__":
 
-    # generate_ordered_sentences_tsv()
+    # Order the sentences
+    generate_ordered_sentences_tsv()
     # Load the sorted_sentences.tsv file with the sorted list of sentences into pandas
     with open("sorted_sentences.tsv", "r", encoding="utf-8") as f:
         tsv_data = csv.reader(f, delimiter="\t")

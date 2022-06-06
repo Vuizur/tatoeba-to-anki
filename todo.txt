@@ -12,12 +12,15 @@
 *https://developer.mozilla.org/de/docs/Web/HTML/Element/details -> Use the details element
 
 *Find a way to reduce the number of sentences (not a problem for Czech-German, but for other languages surely)
+->Set the max sentence limit
 
 *Filter out names out of the sentence difficulty calculation?
 
 *Give higher weight to the rarest word?
 
 *Escape html fields
+
+*Add alternative translations (possibly hidden behind details tag) -> If source sentence is duplicate
 
 *At the end create a shared Google Docs document about how to learn Czech efficiently
 
