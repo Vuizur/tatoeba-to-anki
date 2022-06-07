@@ -1,5 +1,3 @@
-*Add proper Tatobea audio support
-
 *Maybe mark the hardest word in bold and give it a higher weight?
 
 *Add a proper lemmatizer
@@ -18,12 +16,8 @@
 
 *Give higher weight to the rarest word?
 
-*Escape html fields
-
 *Add alternative translations (possibly hidden behind details tag) -> If source sentence is duplicate
 
 *At the end create a shared Google Docs document about how to learn Czech efficiently
 
 *When finished, promote
-
-Add a config.toml file that contains all necessary constants

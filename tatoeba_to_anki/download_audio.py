@@ -5,11 +5,12 @@ import time
 import requests
 from gtts import gTTS
 
+
 def get_sentences_with_audio(sentences_with_audio_path: str) -> dict[int, int]:
 
     # Unpack the tar.bz2 sentences_with_audio file
     with tarfile.open(sentences_with_audio_path, "r:bz2") as tar:
-        tar.extractall()  
+        tar.extractall()
     sentences_with_audio_tsv_path = "sentences_with_audio.csv"
 
     sentences_with_audio: dict[int, int] = {}
@@ -54,15 +55,17 @@ class AudioDownloader:
         if sentence_id in self.sentences_with_tatobea_audio:
             print(f"Downloading audio for sentence_id: {sentence_id}")
             # Download the audio file using the given sentence_id using requests
-            url = "https://tatoeba.org/audio/download/" + str(self.sentences_with_tatobea_audio[sentence_id])
+            url = "https://tatoeba.org/audio/download/" + str(
+                self.sentences_with_tatobea_audio[sentence_id]
+            )
             response = requests.get(url, stream=True)
-            with open(audio_file_path, 'wb') as f:
-               for chunk in response.iter_content(chunk_size=1024):
-                   if chunk:
-                       f.write(chunk)
-                       f.flush()
-               f.close()
-               print("Downloaded audio file: " + audio_file_path)
+            with open(audio_file_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=1024):
+                    if chunk:
+                        f.write(chunk)
+                        f.flush()
+                f.close()
+                print("Downloaded audio file: " + audio_file_path)
             time.sleep(wait_interval)
 
         else:

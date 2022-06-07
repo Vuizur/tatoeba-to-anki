@@ -13,11 +13,11 @@ sentences_with_audio_path = "sentences_with_audio.tar.bz2"
 # "Tatoeba" - download audio only from Tatoeba
 # "Google" - download audio only from Google-TTS
 # "None" - do not download audio
-download_mode = "Both"
+#download_mode = "Both"
 # Wait interval between each sentence audio download (in seconds)
 # This reduces the load on the Tatoeba servers and the chance you get blocked by Google, but
 # reducing it will increase performance
-wait_interval = 1.5
+#wait_interval = 1.5
 # The name of the generated deck
 deck_name = "Tatoeba-Deutsch-Tschechisch"
 # The description of the generated deck, displayed in Anki
@@ -42,4 +42,4 @@ wiktionary_source_language = "Czech"
 # you can specify the path to the file here. Note that the file should be in the Tabfile format.
 # If you have a dictionary in another format, convert it using https://github.com/ilius/pyglossary
 # If you do not want to use a custom dictionary, set this field to "None"
-dictionary_path = ""
+#dictionary_path = ""

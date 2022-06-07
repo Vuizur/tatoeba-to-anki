@@ -2,18 +2,17 @@
 
 <img src="https://raw.githubusercontent.com/Vuizur/tatoeba-to-anki/main/img/anki_screenshot.png" width="50%" class="center">
 
-This project creates Anki flashcards from a Tatoeba language pair, ordering the cards by difficulty and downloading audio from Google-Text-To-Speech to integrate directly into the deck.
+This project creates Anki flashcards from a Tatoeba language pair, ordering the cards by difficulty and downloading audio from Tatoeba (and Google-Text-To-Speech if the native audio is not available) to integrate directly into the deck.
 
 The ordering algorithm takes the average frequency of each sentence and sentence length into account.
 
-It also removes direct duplicates. 
+It also removes duplicates. 
 
-It has been tested for Czech-German, but probably also works for other languages with minimal changes (because the word frequency package I use supports many languages)
+It has been tested for Czech-German, but probably also works for other languages (because the word frequency package I use supports many languages)
 
 ### Running it
 
 First you need to get the data: Go to https://tatoeba.org/en/downloads and download the desired sentence pairs. Then on the same page, download the sentences_with_audio.tar.bz2 as well.
-
 
 Then should clone the project, install poetry and then run `poetry install`. 
 Move the sentence pair files and sentences_with_audio.tar.bz2 into the root folder and edit the settings in `config.toml` to set the names of the relevant input/output files, the language and some other settings.

@@ -16,6 +16,7 @@ def get_sentence_word_frequency(sentence: str, source_lang: str) -> float:
         sentence_length_log = math.log(sentence_length)
     return avgfreq - sentence_length_log
 
+
 def order_sentences(df: pd.DataFrame, source_lang: str) -> pd.DataFrame:
     # Remove columns with duplicate sentence_id (keep first occurence)
     df.drop_duplicates(subset=["sentence_id"], keep="first", inplace=True)
@@ -28,11 +29,3 @@ def order_sentences(df: pd.DataFrame, source_lang: str) -> pd.DataFrame:
     # Turn pandas dataframe continuous again
     df = df.reset_index(drop=True)
     return df
-    # TODO: Find all sentence_source sentences that are very similar:
-    # for i in range(len(df)):
-    #    for j in range(i+1, len(df)):
-    #        if strings_are_extremely_similar(df["sentence_source"][i], df["sentence_source"][j]):
-    #            print(df["sentence_source"][i])
-    #            print(df["sentence_source"][j])
-    #            print("\n")
-    #df.to_csv("sorted_sentences.tsv", sep="\t", encoding="utf-8", index=False)
