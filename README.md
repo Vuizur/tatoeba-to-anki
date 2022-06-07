@@ -12,13 +12,14 @@ It has been tested for Czech-German, but probably also works for other languages
 
 ### Running it
 
-First you need to get the data: Go to https://tatoeba.org/en/downloads, download the desired sentence pairs.
+First you need to get the data: Go to https://tatoeba.org/en/downloads and download the desired sentence pairs. Then on the same page, download the sentences_with_audio.tar.bz2 and put it also in this directory.
+
+
 
 Then should clone the project, install poetry and then run `poetry install`. 
-Move the sentence pair files into the root folder and edit constants in `main.py` to reflect the names of the downloaded files
+Move the sentence pair files and sentences_with_audio.tar.bz2 into the root folder and edit the settings in `config.toml` to set the names of the relevant input/output files, the language and some other settings.
 
-Then run `poetry run python ./tatoeba_to_anki/main.py` to sort the files, remove duplicates, and download the audio.
-After that run `poetry run python ./tatoeba_to_anki/generate_anki_deck.py` to generate the Anki deck.
+Then run `poetry run python ./tatoeba_to_anki/main.py` to sort the files, remove duplicates, download the audio, and generate the Anki deck.
 
 I plan on adding more features, you can open an issue if you think something should be changed/improved.
 

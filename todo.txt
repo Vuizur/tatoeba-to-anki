@@ -25,3 +25,5 @@
 *At the end create a shared Google Docs document about how to learn Czech efficiently
 
 *When finished, promote
+
+Add a config.toml file that contains all necessary constants
