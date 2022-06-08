@@ -21,7 +21,7 @@ def order_sentences(df: pd.DataFrame, source_lang: str) -> pd.DataFrame:
     # Remove columns with duplicate sentence_id (keep first occurence)
     df.drop_duplicates(subset=["sentence_id"], keep="first", inplace=True)
     # Add a column with the sentence word frequency
-    df["sentence_word_frequency"] = df["target_sentence"].apply(
+    df["sentence_word_frequency"] = df["sentence_source"].apply(
         lambda sentence: get_sentence_word_frequency(sentence, source_lang)
     )
     # Sort the dataframe by sentence word frequency

@@ -66,5 +66,8 @@ def prune_sentences(
     #        else:
     #            word_freq[word] = 1
 
+    # Maybe delete the sentences where the rarest word occurs very often, preferably longer ones
+    # Or iterate over everything and skip all sentences where there is no new word (they only get added on the second run)
+    # Until the max number of sentences is reached
     # Maybe delete sentences from behind that only consist of duplicate words
 #

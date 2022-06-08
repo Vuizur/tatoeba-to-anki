@@ -1,4 +1,5 @@
 import html
+import os
 import genanki
 import pandas as pd
 import wordfreq
@@ -19,27 +20,10 @@ def generate_wiktionary_link_html(
     return html
 
 
-class DefinitionGenerator:
-
-    # def convert_dictionary_to_tabfile(self) -> None:
-    #    """Converts the dictionary to a tab-separated file"""
-    #    glos = Glossary()
-    #    glos.convert(
-    #        self.dictionary_path,
-    #        self.input_format,
-    #        outputFilename=self.intermediate_tabfile_path,
-    #        outputFormat="tsv",
-    #    )
-
-    def __init__(self, dictionary_path) -> None:
-        self.dictionary_path = dictionary_path
-
-    # def get_
-
-
 def generate_anki_deck(
     sorted_sentences: pd.DataFrame,
     config: dict,  # deck_name: str, deck_description: str, deck_filename: str, model_id: int, deck_id: int
+    audio_files_folder="audio_files",
 ):
     # MODEL_ID = 1524605756
     # DECK_ID = 1327334698
@@ -63,7 +47,7 @@ def generate_anki_deck(
         config["deck_id"], config["deck_name"], config["deck_description"]
     )
     # Create a new Anki model using genanki
-    model = genanki.Model(
+    audio_note_model = genanki.Model(
         config["model_id"],
         "Simple Model with Media",
         fields=[
@@ -80,14 +64,42 @@ def generate_anki_deck(
         ],
         css=css_s,
     )
+    no_audio_model = genanki.Model(
+        1414956686,
+        "Simple Model",
+        fields=[
+            {"name": "Question"},
+            {"name": "Answer"},
+        ],
+        templates=[
+            {
+                "name": "Card 1",
+                "qfmt": "{{Question}}",
+                "afmt": '{{FrontSide}}<hr id="answer">{{Answer}}',
+            },
+        ],
+        css=css_s,
+    )
 
     package = genanki.Package(deck)
 
-    package.media_files = (
-        sorted_sentences["sentence_id"]
-        .map(lambda x: "audio_files/" + str(x) + ".mp3")
-        .to_list()
-    )
+    # Get a list of all files in the audio_files folder with the full relative path if the audio files folder exists
+    if os.path.exists(audio_files_folder):
+        audio_files = [
+            os.path.join(audio_files_folder, f)
+            for f in os.listdir(audio_files_folder)
+            if os.path.isfile(os.path.join(audio_files_folder, f))
+        ]
+    # audio_files = os.listdir(audio_files_folder)
+    # audio_files = [
+    #    f for f in os.listdir(config["audio_files_path"]) if os.path.isfile(f)
+    # ]
+        package.media_files = audio_files
+    # package.media_files = (
+    #    sorted_sentences["sentence_id"]
+    #    .map(lambda x: "audio_files/" + str(x) + ".mp3")
+    #    .to_list()
+    # )
 
     # Iterate through the sorted sentences and add them to the Anki deck
     for index, row in sorted_sentences.iterrows():
@@ -96,15 +108,25 @@ def generate_anki_deck(
             target_sentence_html = f"{html.escape(target_sentence)}{generate_wiktionary_link_html(row['sentence_source'], config['wiktionary_base_url'], config['wiktionary_source_language'], config['source_language'])}"
         else:
             target_sentence_html = html.escape(target_sentence)
-        # Create a new Anki note using genanki
-        note = genanki.Note(
-            model=model,
-            fields=[
-                html.escape(row["sentence_source"]),
-                target_sentence_html,
-                f"[sound:{row['sentence_id']}.mp3]",
-            ],
-        )
+        # Create a new Anki note using genanki depending on whether an audio file for it exists
+        if os.path.isfile(os.path.join("audio_files/", f"{row['sentence_id']}.mp3")):
+
+            note = genanki.Note(
+                model=audio_note_model,
+                fields=[
+                    html.escape(row["sentence_source"]),
+                    target_sentence_html,
+                    f"[sound:{row['sentence_id']}.mp3]",
+                ],
+            )
+        else:
+            note = genanki.Note(
+                model=no_audio_model,
+                fields=[
+                    html.escape(row["sentence_source"]),
+                    target_sentence_html,
+                ],
+            )
         # Add the note to the Anki deck
         deck.add_note(note)
 
