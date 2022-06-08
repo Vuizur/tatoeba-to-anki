@@ -51,12 +51,14 @@ if __name__ == "__main__":
         audio_dir=AUDIO_DIR,
     )
     # Iterate through the dataframe and download the audio files
-    for i in range(len(sorted_sentences)):
-        audio_downloader.download_audio(
-            sorted_sentences["sentence_id"][i],
-            sorted_sentences["sentence_source"][i],
-            random.randint(1, 2),
-        )
+    if config["download_mode"] != "None":
+        for i in range(len(sorted_sentences)):
+            audio_downloader.download_audio(
+                sorted_sentences["sentence_id"][i],
+                sorted_sentences["sentence_source"][i],
+                config["wait_interval"],
+                config["download_mode"]
+            )
     print("Audio files downloaded")
     # Generate the Anki deck
     generate_anki_deck(sorted_sentences, config)

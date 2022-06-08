@@ -19,8 +19,15 @@ Move the sentence pair files and sentences_with_audio.tar.bz2 into the root fold
 
 Then run `poetry run python ./tatoeba_to_anki/main.py` for the program to generate the Anki deck.
 
-I plan on adding more features, you can open an issue if you think something should be changed/improved.
+I plan on adding more features, you can open an issue if you think something should be changed/improved or send a pull request.
 
+#### Language-specific requirements
+
+In Chinese, the external library jieba is required. Install it with `poetry add jieba`.
+
+Also, to quote the wordfreq package:
+    
+In Japanese and Korean, instead of using the regex library, it uses the external library mecab-python3. This is an optional dependency of wordfreq, and compiling it requires the libmecab-dev system package to be installed.
 ### Interesting other projects:
 * This [project for generating Swedish cards](https://github.com/vvpd/anki_swedish) is pretty sophisticated and is probably worth understanding more fully
 

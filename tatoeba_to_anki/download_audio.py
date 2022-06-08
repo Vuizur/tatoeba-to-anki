@@ -1,5 +1,6 @@
 import csv
 import os
+import random
 import tarfile
 import time
 import requests
@@ -41,18 +42,25 @@ class AudioDownloader:
         return os.path.join(self.audio_dir, sentence_id + ".mp3")
 
     def download_audio(
-        self, sentence_id: int, sentence: str, wait_interval: float
+        self, sentence_id: int, sentence: str, wait_interval: float,  download_mode: str
     ) -> None:
         """
         Download the audio file for the given sentence.
         """
+
+        if download_mode == "None":
+            print("No audio download")
+            return
+        
+        # Multiply the wait interval by a random number between 0.5 and 1.5
+        wait_interval = wait_interval * (0.5 + (0.5 * random.random()))
 
         # Check if an audio file with the given sentence_id exists.
         audio_file_path = os.path.join(self.audio_dir, str(sentence_id) + ".mp3")
         if os.path.exists(audio_file_path):
             print("File already exists: " + audio_file_path)
             return
-        if sentence_id in self.sentences_with_tatobea_audio:
+        if sentence_id in self.sentences_with_tatobea_audio and download_mode != "Google":
             print(f"Downloading audio for sentence_id: {sentence_id}")
             # Download the audio file using the given sentence_id using requests
             url = "https://tatoeba.org/audio/download/" + str(
@@ -67,8 +75,7 @@ class AudioDownloader:
                 f.close()
                 print("Downloaded audio file: " + audio_file_path)
             time.sleep(wait_interval)
-
-        else:
+        elif download_mode != "Tatoeba":
             # Download the audio file for the given sentence using gTTS
             print("Downloading audio for sentence: " + sentence)
             tts = gTTS(text=sentence, lang=self.language)
