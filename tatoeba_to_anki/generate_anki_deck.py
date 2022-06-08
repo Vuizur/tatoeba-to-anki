@@ -89,6 +89,9 @@ def generate_anki_deck(
             os.path.join(audio_files_folder, f)
             for f in os.listdir(audio_files_folder)
             if os.path.isfile(os.path.join(audio_files_folder, f))
+            and f.split(".")[0].isdigit()
+            # also check if the sentence id in the filename matches the sentence id in the sorted_sentences
+            and int(f.split(".")[0]) in sorted_sentences["sentence_id"].values
         ]
     # audio_files = os.listdir(audio_files_folder)
     # audio_files = [

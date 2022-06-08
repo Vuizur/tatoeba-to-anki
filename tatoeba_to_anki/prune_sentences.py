@@ -48,6 +48,9 @@ def prune_sentences(
         else:
             sentences_set.add(sentence_without_punctuation)
 
+    # In rare cases a row is not correctly loaded because of quotes, so we need to remove it
+    df = df.dropna()
+
     df = df.reset_index(drop=True)
 
     # If there are less sentences than max_sentence_num, return the dataframe

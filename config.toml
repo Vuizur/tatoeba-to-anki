@@ -13,23 +13,23 @@ sentences_with_audio_path = "sentences_with_audio.tar.bz2"
 # "Tatoeba" - download audio only from Tatoeba
 # "Google" - download audio only from Google-TTS
 # "None" - do not download audio
-download_mode = "None"
+download_mode = "Both"
 # Wait interval between each sentence audio download (in seconds)
 # This reduces the load on the Tatoeba servers and the chance you get blocked by Google, but
 # reducing it will increase performance
 wait_interval = 1.5
 # The name of the generated deck
-deck_name = "Tatoeba-Deutsch-Tschechisch-Noaudio"
+deck_name = "Tatoeba-Deutsch-Tschechisch-New"
 # The description of the generated deck, displayed in Anki
-deck_description = "A deck which contains more than 5000 sentences from Czech to German. The sentences are taken from Tatoeba.com."
+deck_description = "A deck which contains more than 5000 sentences from Czech to German. The sentences are taken from Tatoeba.com. Tschechisch-Deutsch"
 # The output path of the generated deck
-deck_output_path = "Tatoeba-Deutsch-Tschechisch 2.apkg"
+deck_output_path = "Tatoeba-Deutsch-Tschechisch new.apkg"
 # Unique IDs of the generated deck/model
 # According to genanki, should be generated using 
 # import random; random.randrange(1 << 30, 1 << 31)
 # and then written here
-model_id = 1524605956
-deck_id = 1327331698
+model_id = 1524505956
+deck_id = 1329331698
 # Should there be help included to look up single words?
 # "None" - cards only contain sentences
 # "Wiktionary" - cards contain links to Wiktionary
