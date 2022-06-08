@@ -1,4 +1,4 @@
-import random
+import sys
 import pandas as pd
 from tatoeba_to_anki.download_audio import AudioDownloader, get_sentences_with_audio
 import tomli
@@ -29,13 +29,23 @@ def load_sentences_from_tsv(tsv_file_path: str) -> pd.DataFrame:
 
 if __name__ == "__main__":
 
-    with open("config.toml", "rb") as f:
+    # If a parameter is passed, use it as the config file
+    if len(sys.argv) > 1:
+        config_file = sys.argv[1]
+    else:
+        config_file = "config.toml"
+
+    with open(config_file, "rb") as f:
         config = tomli.load(f)
     print("Config loaded")
     df = load_sentences_from_tsv(config["sentence_pairs_path"])
     print("Sentences loaded")
     # Order the sentences
     sorted_sentences = order_sentences(df, config["source_language"])
+    
+    # Print the sentences to a file
+    sorted_sentences.to_csv("sorted_sentences_new.tsv", sep="\t", encoding="utf-8")
+    
     print("Sentences sorted")
     sentences_with_audio_path = config["sentences_with_audio_path"]
 
