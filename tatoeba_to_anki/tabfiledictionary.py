@@ -89,4 +89,4 @@ class SimpleTabfileDictionary:
 
 if __name__ == "__main__":
     dictionary = SimpleTabfileDictionary("Tschechisch-Deutsch.txt")
-    print(dictionary.get_entries("fdfd"))
+    print(dictionary.get_entries("moc"))

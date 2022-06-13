@@ -1,6 +1,6 @@
 *Maybe mark the hardest word in bold and give it a higher weight?
 
-*Add a proper lemmatizer
+*Add a proper lemmatizer (Probably not realistic?)
 
 *Add certain tags to definition and remove sentences with certain tags
 
@@ -16,5 +16,6 @@
 *Add alternative translations (possibly hidden behind details tag) -> If source sentence is duplicate
 
 *At the end create a shared Google Docs document about how to learn Czech efficiently
-
+*To je vsechno -> duplicate with other punctuation exists (unfortunately), but shouldn't
+*Remove sentences by non-native speakers
 *When finished, promote

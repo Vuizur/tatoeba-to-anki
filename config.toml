@@ -19,9 +19,9 @@ download_mode = "Both"
 # reducing it will increase performance
 wait_interval = 1.5
 # The name of the generated deck
-deck_name = "Tatoeba-Deutsch-Tschechisch-New"
+deck_name = "Tatoeba-Deutsch-Tschechisch 5000+ Sätze"
 # The description of the generated deck, displayed in Anki
-deck_description = "A deck which contains more than 5000 sentences from Czech to German. The sentences are taken from Tatoeba.com. Tschechisch-Deutsch"
+deck_description = "Das Deck enthält mehr als 5000 tschechische Sätze mit deutschen Übersetzungen aus Tatoeba."
 # The output path of the generated deck
 deck_output_path = "Tatoeba-Deutsch-Tschechisch new.apkg"
 # Unique IDs of the generated deck/model

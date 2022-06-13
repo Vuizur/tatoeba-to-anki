@@ -106,16 +106,9 @@ def generate_anki_deck(
             # also check if the sentence id in the filename matches the sentence id in the sorted_sentences
             and int(f.split(".")[0]) in sorted_sentences["sentence_id"].values
         ]
-    # audio_files = os.listdir(audio_files_folder)
-    # audio_files = [
-    #    f for f in os.listdir(config["audio_files_path"]) if os.path.isfile(f)
-    # ]
+
         package.media_files = audio_files
-    # package.media_files = (
-    #    sorted_sentences["sentence_id"]
-    #    .map(lambda x: "audio_files/" + str(x) + ".mp3")
-    #    .to_list()
-    # )
+
     if config["single_word_lookup_mode"] == "Dictionary":
         dictionary = SimpleTabfileDictionary(config["dictionary_path"])
 
@@ -156,4 +149,4 @@ def generate_anki_deck(
 
 if __name__ == "__main__":
     dictionary = SimpleTabfileDictionary("Tschechisch-Deutsch.txt")
-    print(generate_dictionary_html("svoboda je pro mě velmi důležitá", dictionary, "cs"))
+    print(generate_dictionary_html("moc svoboda", dictionary, "cs"))
