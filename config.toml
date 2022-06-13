@@ -34,7 +34,7 @@ deck_id = 1329331698
 # "None" - cards only contain sentences
 # "Wiktionary" - cards contain links to Wiktionary
 # "Dictionary" - use a custom dictionary to directly include single word definitions on the cards.
-single_word_lookup_mode = "Wiktionary"
+single_word_lookup_mode = "Dictionary"
 wiktionary_base_url = "https://en.wiktionary.org/wiki/"
 # The wiktionary language that should be linked to - if you use the Spanish Wiktionary this should be in Spanish, for example
 wiktionary_source_language = "Czech" 
@@ -42,4 +42,4 @@ wiktionary_source_language = "Czech"
 # you can specify the path to the file here. Note that the file should be in the Tabfile format.
 # If you have a dictionary in another format, convert it using https://github.com/ilius/pyglossary
 # If you do not want to use a custom dictionary, set this field to "None"
-#dictionary_path = ""
+dictionary_path = "Tschechisch-Deutsch.txt"

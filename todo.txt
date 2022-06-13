@@ -2,15 +2,12 @@
 
 *Add a proper lemmatizer
 
+*Add certain tags to definition and remove sentences with certain tags
+
 *Don't add that many cards for the same "hardest" bolded word
 
-*Create a Czech-German dictionary from the german Wiktionary HTML dump
-
-*Include interactive dictionary lookup (loading data from a TSV/JSON/Tabfile dictionary, dictionary loading taken from pyglossary)
-*https://developer.mozilla.org/de/docs/Web/HTML/Element/details -> Use the details element
-
 *Find a way to reduce the number of sentences (not a problem for Czech-German, but for other languages surely)
-->Set the max sentence limit
+->Set the max sentence limit (and fix this, currently broken)
 
 *Filter out names out of the sentence difficulty calculation?
 

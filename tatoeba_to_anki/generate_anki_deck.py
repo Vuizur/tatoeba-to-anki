@@ -4,6 +4,8 @@ import genanki
 import pandas as pd
 import wordfreq
 
+from tatoeba_to_anki.tabfiledictionary import SimpleTabfileDictionary
+
 
 def generate_wiktionary_link_html(
     sentence: str,
@@ -19,18 +21,29 @@ def generate_wiktionary_link_html(
     html += "</p>"
     return html
 
+def generate_dictionary_html(
+    sentence: str,
+    dictionary: SimpleTabfileDictionary,
+    ietf_language_code: str,
+) -> str:
+    tokens = wordfreq.tokenize(sentence, ietf_language_code)
+    html = "<p>"
+    for token in tokens:
+        results = dictionary.get_entries(token)
+        if results is not None:
+            html += "<details><summary>" + token + "</summary>"
+            for result in results:
+                html += f"<b>{list(result.headword_and_inflections)[0]}</b>"
+                html += f"<br>{result.definition}<br><br>"
+            html += "</details>"
+    html += "</p>"
+    return html
 
 def generate_anki_deck(
     sorted_sentences: pd.DataFrame,
     config: dict,  # deck_name: str, deck_description: str, deck_filename: str, model_id: int, deck_id: int
     audio_files_folder="audio_files",
 ):
-    # MODEL_ID = 1524605756
-    # DECK_ID = 1327334698
-    ## Load the sorted_sentences.tsv file with the sorted list of sentences into pandas
-    # with open(sorted_tsv_file_path, "r", encoding="utf-8") as f:
-    #    # Read tsv to pandas
-    #    sorted_sentences = pd.read_csv(f, sep="\t", encoding="utf-8")
 
     css_s = """
     .card {
@@ -103,12 +116,17 @@ def generate_anki_deck(
     #    .map(lambda x: "audio_files/" + str(x) + ".mp3")
     #    .to_list()
     # )
+    if config["single_word_lookup_mode"] == "Dictionary":
+        dictionary = SimpleTabfileDictionary(config["dictionary_path"])
+
 
     # Iterate through the sorted sentences and add them to the Anki deck
     for index, row in sorted_sentences.iterrows():
         target_sentence = row["target_sentence"]
-        if config["single_word_lookup_mode"]:
+        if config["single_word_lookup_mode"] == "Wiktionary":
             target_sentence_html = f"{html.escape(target_sentence)}{generate_wiktionary_link_html(row['sentence_source'], config['wiktionary_base_url'], config['wiktionary_source_language'], config['source_language'])}"
+        elif config["single_word_lookup_mode"] == "Dictionary":
+            target_sentence_html = f"{html.escape(target_sentence)}{generate_dictionary_html(row['sentence_source'], dictionary, config['source_language'])}"
         else:
             target_sentence_html = html.escape(target_sentence)
         # Create a new Anki note using genanki depending on whether an audio file for it exists
@@ -136,10 +154,6 @@ def generate_anki_deck(
     package.write_to_file(config["deck_output_path"])
 
 
-# if __name__ == "__main__":
-#    generate_anki_deck(
-#        sorted_tsv_file_path="sorted_sentences.tsv",
-#        deck_name="Tschechisch-Deutsch",
-#        deck_description="Tschechisch-Deutsches Anki-Deck",
-#        deck_filename="tschechisch_deutsch_deck.apkg",
-#    )
+if __name__ == "__main__":
+    dictionary = SimpleTabfileDictionary("Tschechisch-Deutsch.txt")
+    print(generate_dictionary_html("svoboda je pro mě velmi důležitá", dictionary, "cs"))

@@ -8,7 +8,9 @@ The ordering algorithm takes the average frequency of each sentence and sentence
 
 It also removes duplicates. 
 
-It has been tested for Czech-German, but probably also works for other languages (because the word frequency package I use supports many languages)
+Additionally it supports the generation of automatic help to lookup single words. You can pass a tabfile dictionary (use [pyglossary](https://github.com/ilius/pyglossary) to convert other dictionaries), which will add the translation of each word directly to each card. Or you can choose to add links to Wiktionary instead.
+
+It has been tested for Czech-German, but also works for other languages (because the word frequency package I use supports many languages)
 
 ### Running it
 
