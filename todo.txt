@@ -17,5 +17,8 @@
 
 *At the end create a shared Google Docs document about how to learn Czech efficiently
 *To je vsechno -> duplicate with other punctuation exists (unfortunately), but shouldn't
+
+*Use the ebook creator library to get the tabfile dictionary programmatically
+
 *Remove sentences by non-native speakers
 *When finished, promote

@@ -6,10 +6,14 @@ authors = ["Vuizur <Vuizur@users.noreply.github.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-wordfreq = "*"
-genanki = "*"
-gTTS = "*"
-pandas = "*"
+pandas = "^1.5.0"
+wordfreq = {extras = ["cjk"], version = "^3.0.2"}
+tatoebatools = "^0.2.1"
+edge-tts = "^5.0.6"
+ebook-dictionary-creator = {git = "https://github.com/Vuizur/ebook_dictionary_creator"}
+gtts = "^2.2.4"
+genanki = "^0.13.0"
+
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
