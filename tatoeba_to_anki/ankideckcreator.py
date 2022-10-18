@@ -40,7 +40,7 @@ class AnkiDeckCreator:
         outdated_tags: list[str] = ["outdated, old-fashioned"],
         audio_folder="audio",
         dictionary_tabfile_path=None,
-        only_take_sentences_from_natives=True,
+        minimum_skill_level = 4,
         download_and_create_english_dictionary=True,
         deck_output_path=None,
         deck_name=None,
@@ -66,8 +66,8 @@ class AnkiDeckCreator:
         self.outdated_tags = outdated_tags
 
         self.audio_folder = audio_folder
-        self.only_take_sentences_from_natives = only_take_sentences_from_natives
 
+        self.minimum_skill_level = minimum_skill_level
         if dictionary_tabfile_path == None and download_and_create_english_dictionary:
             self.dictionary_tabfile_path = (
                 f"{self.source_language_code}_{self.target_language_code}.txt"
@@ -181,7 +181,7 @@ class AnkiDeckCreator:
                 LEFT JOIN sentences_with_audio ON sd1.sentence_id = sentences_with_audio.sentence_id
 				INNER JOIN user_languages ON user_languages.username = sd1.username
                 WHERE user_languages.lang = "{self.source_language_code}" 
-                AND sd1.lang = "{self.source_language_code}"" 
+                AND sd1.lang = "{self.source_language_code}"
                 AND sd2.lang = "{self.target_language_code}"
             """
         )
@@ -240,40 +240,6 @@ class AnkiDeckCreator:
         )
 
         self.conn.commit()
-        self.conn.close()
-
-    def query_relevant_sentences(self) -> list:
-
-        outdated_char_str = ",".join([f'"{char}"' for char in self.outdated_tags])
-        # TODO: Kind of insecure, so this shouldn't be put behind a server like this.
-        # Also this does quite not work right now and should be done differently.
-
-        result = self.cur.execute(
-            f"""SELECT sd1.sentence_id, sd1."text", sd2."text", sentences_with_audio.audio_id, tags.tag_name FROM sentences_detailed sd1
-            INNER JOIN links ON sd1.sentence_id = links.sentence_id 
-            INNER JOIN sentences_detailed sd2 ON sd2.sentence_id = links.translation_id
-            LEFT JOIN sentences_with_audio ON sd1.sentence_id = sentences_with_audio.sentence_id
-            LEFT JOIN tags ON sd1.sentence_id = tags.sentence_id
-            INNER JOIN user_languages ON user_languages.username = sd1.username
-            WHERE user_languages.lang = ?
-            AND sd1.lang = ?
-            AND sd2.lang = ?
-            {"AND user_languages.skill_level = 5" if self.only_take_sentences_from_natives else ""}
-            AND (tags.tag_name IS NULL OR tags.tag_name NOT IN ({outdated_char_str}))
-            ORDER BY sd1.frequency DESC
-            """,  # TODO: Remove limit
-            (
-                self.source_language_code,
-                self.source_language_code,
-                self.target_language_code,
-            ),
-        ).fetchall()
-        # Print the result to the file "test.txt"
-        with open("test.txt", "w", encoding="utf-8") as f:
-            for row in result:
-                f.write(str(row) + "\n")
-
-        return result
 
     def prune_duplicates(self):
         con = sqlite3.connect(self.database_name)
@@ -339,6 +305,13 @@ class AnkiDeckCreator:
         dictionary_creator.create_database()
         dictionary_creator.export_to_tabfile(tabfile_path=self.dictionary_tabfile_path)
 
+    
+    def query_relevant_sentences(self) -> list:
+        return self.cur.execute("""SELECT source_sentence_id, source_text, translation_text, audio_id
+        FROM sentences_with_translations
+        ORDER BY frequency DESC
+        """).fetchall()
+
     def generate_anki_deck(self):
         css_s = """
     .card {
@@ -397,11 +370,12 @@ class AnkiDeckCreator:
         # Get the sentences from the database
         sentences = self.query_relevant_sentences()
 
+
         tabfile_dictionary = TabfileDictionary(self.dictionary_tabfile_path)
 
         card_num = 0
 
-        for source_sentence_id, source_sentence, translation, _, _ in sentences:
+        for source_sentence_id, source_sentence, translation, audio_id in sentences:
             target_sentence_html = f"{html.escape(translation)}{generate_dictionary_html(source_sentence, tabfile_dictionary, source_language_ietf_code)}"
 
             # if os.path.isfile(
@@ -446,7 +420,6 @@ class AnkiDeckCreator:
     def __del__(self):
         self.conn.commit()
         self.conn.close()
-
 
 if __name__ == "__main__":
     adc = AnkiDeckCreator("Czech", "German")
