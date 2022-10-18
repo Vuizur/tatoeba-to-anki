@@ -4,7 +4,8 @@ import genanki
 import pandas as pd
 import wordfreq
 
-from tatoeba_to_anki.tabfiledictionary import SimpleTabfileDictionary
+#from tabfiledictionary import SimpleTabfileDictionary
+from tabfile_dictionary.dictionary import TabfileDictionary
 
 
 def generate_wiktionary_link_html(
@@ -23,18 +24,18 @@ def generate_wiktionary_link_html(
 
 def generate_dictionary_html(
     sentence: str,
-    dictionary: SimpleTabfileDictionary,
+    dictionary: TabfileDictionary,
     ietf_language_code: str,
 ) -> str:
     tokens = wordfreq.tokenize(sentence, ietf_language_code)
     html = "<p>"
     for token in tokens:
-        results = dictionary.get_entries(token)
+        results = dictionary.lookup(token)
         if results is not None:
             html += "<details><summary>" + token + "</summary>"
             for result in results:
-                html += f"<b>{list(result.headword_and_inflections)[0]}</b>"
-                html += f"<br>{result.definition}<br><br>"
+                html += f"<b>{result.word.strip()}</b>"
+                html += f"<br>{result.definition.strip()}<br><br>"
             html += "</details>"
     html += "</p>"
     return html

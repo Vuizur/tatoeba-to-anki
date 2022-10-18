@@ -1,6 +1,8 @@
 import html
 import os
+from numpy import source
 import pycountry
+from requests import delete
 
 from sqlalchemy import create_engine, Index
 import sqlite3
@@ -9,6 +11,8 @@ from ebook_dictionary_creator.e_dictionary_creator.dictionary_creator import (
     DictionaryCreator,
 )
 import genanki
+
+from prune_sentences import are_duplicates
 
 from tatoebatools import tatoeba
 from tatoebatools.models import (
@@ -20,7 +24,10 @@ from tatoebatools.models import (
     Tag,
 )
 
-from tatoeba_to_anki.generate_anki_deck import generate_dictionary_html, generate_wiktionary_link_html
+from generate_anki_deck import generate_dictionary_html
+from tabfile_dictionary import TabfileDictionary
+
+from prune_sentences import delete_punctuation
 
 
 class AnkiDeckCreator:
@@ -29,7 +36,7 @@ class AnkiDeckCreator:
         source_language: str,
         target_language: str,
         deck_id=1329331698,
-        model_id = 1524505956,
+        model_id=1524505956,
         outdated_tags: list[str] = ["outdated, old-fashioned"],
         audio_folder="audio",
         dictionary_tabfile_path=None,
@@ -39,6 +46,7 @@ class AnkiDeckCreator:
         deck_name=None,
         deck_description=None,
         deck_author="Vuizur",
+        max_sentence_number=10000,
     ):
         self.source_language = source_language
         self.target_language = target_language
@@ -73,16 +81,17 @@ class AnkiDeckCreator:
             self.deck_output_path = deck_output_path
 
         if deck_name == None:
-            self.deck_name = f"{self.source_language_code} - {self.target_language_code} frequency sentences deck"
+            self.deck_name = f"{self.source_language} - {self.target_language} frequency sentences deck"
         else:
             self.deck_name = deck_name
 
         if deck_description == None:
-            self.deck_description = f"Frequency sentences deck for {self.source_language_code} - {self.target_language_code}"
+            self.deck_description = f"Frequency sentences deck for {self.source_language} - {self.target_language}"
         else:
             self.deck_description = deck_description
 
         self.deck_author = deck_author
+        self.max_sentence_number = max_sentence_number
 
     def create_database(self):
 
@@ -148,27 +157,99 @@ class AnkiDeckCreator:
         ix.create(engine)
 
         # Drop duplicate sentence_id rows
-        conn = sqlite3.connect(self.database_name)
-        c = conn.cursor()
-        c.execute(
+        self.conn = sqlite3.connect(self.database_name)
+        self.cur = self.conn.cursor()
+        self.cur.execute(
             "DELETE FROM sentences_detailed WHERE rowid NOT IN (SELECT MIN(rowid) FROM sentences_detailed GROUP BY sentence_id)"
         )
-        conn.commit()
-        conn.close()
+        self.calculate_sentence_frequency()
+        # Ok, not safe, but it's good enough for now
+        self.cur.execute(
+            f"""CREATE VIEW sentences_with_translations AS
+                SELECT
+                sd1.sentence_id AS source_sentence_id,
+                sd1.text AS source_text,
+                sd2.sentence_id AS translation_sentence_id,
+                sd2.text AS translation_text,
+                sentences_with_audio.audio_id AS audio_id,
+                sd1.username AS source_username, 
+                sd1.frequency,
+                user_languages.skill_level AS source_lang_skill_level
+                FROM sentences_detailed sd1
+                JOIN links l ON sd1.sentence_id = l.sentence_id
+                JOIN sentences_detailed sd2 ON l.translation_id = sd2.sentence_id
+                LEFT JOIN sentences_with_audio ON sd1.sentence_id = sentences_with_audio.sentence_id
+				INNER JOIN user_languages ON user_languages.username = sd1.username
+                WHERE user_languages.lang = "{self.source_language_code}" 
+                AND sd1.lang = "{self.source_language_code}"" 
+                AND sd2.lang = "{self.target_language_code}"
+            """
+        )
+
+        self.conn.commit()
         # Sqlalchemy vacuum, but too slow
         # engine.execute("VACUUM")
-        self.calculate_sentence_frequency()
+        self.prune_duplicates()
+        # self.delete_sentences_over_max_sentence_number()
+
+    def delete_sentences_over_max_sentence_number(self):
+        # TODO: Fix this
+        unique_words: set[str] = set()
+        sentences_that_contain_unique_words: set[int] = set()
+        for row in self.cur.execute(
+            """SELECT sentence_id, "text" FROM sentences_detailed WHERE lang=? ORDER BY frequency DESC""",
+            (self.source_language_code,),
+        ):
+            # Check if the sentence contains at least one unique word
+            unique_words_of_the_sentence = (
+                set([delete_punctuation(word.lower()) for word in row[1].split(" ")])
+                - unique_words
+            )
+            if len(unique_words_of_the_sentence) > 0:
+                unique_words.update(unique_words_of_the_sentence)
+                sentences_that_contain_unique_words.add(row[0])
+            if len(sentences_that_contain_unique_words) >= self.max_sentence_number:
+                break
+        if len(sentences_that_contain_unique_words) < self.max_sentence_number:
+            # Add random sentences to reach the max_sentence_number
+            for row in self.cur.execute(
+                "SELECT sentence_id FROM sentences_detailed WHERE lang=? ORDER BY RANDOM() LIMIT ?",
+                (self.source_language_code, self.max_sentence_number),
+            ):
+                if len(sentences_that_contain_unique_words) >= self.max_sentence_number:
+                    break
+                sentences_that_contain_unique_words.add(row[0])
+
+        translation_ids_to_keep = []
+        for row in self.cur.execute(
+            "SELECT translation_id FROM links WHERE sentence_id IN ({})".format(
+                ",".join("?" * len(sentences_that_contain_unique_words))
+            ),
+            tuple(sentences_that_contain_unique_words),
+        ):
+            translation_ids_to_keep.append(row[0])
+
+        ids_to_keep = (
+            list(sentences_that_contain_unique_words) + translation_ids_to_keep
+        )
+        self.cur.execute(
+            "DELETE FROM sentences_detailed WHERE sentence_id NOT IN ({})".format(
+                ",".join("?" * len(ids_to_keep))
+            ),
+            tuple(ids_to_keep),
+        )
+
+        self.conn.commit()
+        self.conn.close()
 
     def query_relevant_sentences(self) -> list:
-        conn = sqlite3.connect(self.database_name)
-        c = conn.cursor()
 
         outdated_char_str = ",".join([f'"{char}"' for char in self.outdated_tags])
         # TODO: Kind of insecure, so this shouldn't be put behind a server like this.
         # Also this does quite not work right now and should be done differently.
 
-        result = c.execute(
-            f"""SELECT sd1."text", sd2."text", sentences_with_audio.audio_id, tags.tag_name FROM sentences_detailed sd1
+        result = self.cur.execute(
+            f"""SELECT sd1.sentence_id, sd1."text", sd2."text", sentences_with_audio.audio_id, tags.tag_name FROM sentences_detailed sd1
             INNER JOIN links ON sd1.sentence_id = links.sentence_id 
             INNER JOIN sentences_detailed sd2 ON sd2.sentence_id = links.translation_id
             LEFT JOIN sentences_with_audio ON sd1.sentence_id = sentences_with_audio.sentence_id
@@ -179,7 +260,8 @@ class AnkiDeckCreator:
             AND sd2.lang = ?
             {"AND user_languages.skill_level = 5" if self.only_take_sentences_from_natives else ""}
             AND (tags.tag_name IS NULL OR tags.tag_name NOT IN ({outdated_char_str}))
-            """,
+            ORDER BY sd1.frequency DESC
+            """,  # TODO: Remove limit
             (
                 self.source_language_code,
                 self.source_language_code,
@@ -191,44 +273,63 @@ class AnkiDeckCreator:
             for row in result:
                 f.write(str(row) + "\n")
 
-        conn.close()
-
         return result
+
+    def prune_duplicates(self):
+        con = sqlite3.connect(self.database_name)
+        cur = con.cursor()
+
+        cur.execute(
+            "SELECT sentence_id, text FROM sentences_detailed WHERE lang = ?",
+            (self.source_language_code,),
+        )
+        rows = cur.fetchall()
+        seen = set()
+        for sentence_id, text in rows:
+            no_punct = delete_punctuation(text)
+            if no_punct in seen:
+                cur.execute(
+                    "DELETE FROM sentences_detailed WHERE sentence_id = ?",
+                    (sentence_id,),
+                )
+            else:
+                seen.add(no_punct)
+        con.commit()
+        con.close()
 
     def calculate_sentence_frequency(self):
         # Adds a column to the sentences_detailed table which contains the word frequency of the sentence
-        conn = sqlite3.connect(self.database_name)
 
         # Calculate the IETF BCP 47 language code
         source_language_ietf_code = pycountry.languages.get(
             name=self.source_language
         ).alpha_2
 
-        c = conn.cursor()
-        c.execute("""ALTER TABLE sentences_detailed ADD COLUMN frequency INTEGER""")
+        self.cur.execute(
+            """ALTER TABLE sentences_detailed ADD COLUMN frequency INTEGER"""
+        )
 
         # Use the get_sentence_word_frequency function to get the word frequency of each sentence
-        c.execute(
+        self.cur.execute(
             """SELECT sentence_id, text FROM sentences_detailed WHERE lang = ?""",
             (self.source_language_code,),
         )
 
-        sentences = c.fetchall()
+        sentences = self.cur.fetchall()
         for sentence in sentences:
             frequency = get_sentence_word_frequency(
                 sentence[1], source_language_ietf_code
             )
-            c.execute(
+            self.cur.execute(
                 """UPDATE sentences_detailed SET frequency = ? WHERE sentence_id = ?""",
                 (frequency, sentence[0]),
             )
 
         # Add the index to the frequency column
-        c.execute(
+        self.cur.execute(
             """CREATE INDEX ix_sentences_detailed_frequency ON sentences_detailed (frequency)"""
         )
-        c.execute("COMMIT")
-        conn.close()
+        self.cur.execute("COMMIT")
 
     def download_tabfile_dictionary(self):
         dictionary_creator = DictionaryCreator(
@@ -250,9 +351,7 @@ class AnkiDeckCreator:
         }
         """
         # Create a new Anki deck using genanki
-        deck = genanki.Deck(
-            self.deck_id, self.deck_name, self.deck_description
-        )
+        deck = genanki.Deck(self.deck_id, self.deck_name, self.deck_description)
         # Create a new Anki model using genanki
         audio_note_model = genanki.Model(
             self.model_id,
@@ -288,49 +387,67 @@ class AnkiDeckCreator:
             css=css_s,
         )
 
+        # Generate ietf language code
+        source_language_ietf_code = pycountry.languages.get(
+            name=self.source_language
+        ).alpha_2
+
         package = genanki.Package(deck)
 
         # Get the sentences from the database
         sentences = self.query_relevant_sentences()
 
-        for source_sentence, translation, _, _ in sentences:
-            pass
+        tabfile_dictionary = TabfileDictionary(self.dictionary_tabfile_path)
 
-        # Iterate through the sorted sentences and add them to the Anki deck
-        for index, row in sorted_sentences.iterrows():
-            target_sentence = row["target_sentence"]
-            if config["single_word_lookup_mode"] == "Wiktionary":
-                target_sentence_html = f"{html.escape(target_sentence)}{generate_wiktionary_link_html(row['sentence_source'], config['wiktionary_base_url'], config['wiktionary_source_language'], config['source_language'])}"
-            elif config["single_word_lookup_mode"] == "Dictionary":
-                target_sentence_html = f"{html.escape(target_sentence)}{generate_dictionary_html(row['sentence_source'], dictionary, config['source_language'])}"
-            else:
-                target_sentence_html = html.escape(target_sentence)
-            # Create a new Anki note using genanki depending on whether an audio file for it exists
-            if os.path.isfile(
-                os.path.join("audio_files/", f"{row['sentence_id']}.mp3")
-            ):
+        card_num = 0
+
+        for source_sentence_id, source_sentence, translation, _, _ in sentences:
+            target_sentence_html = f"{html.escape(translation)}{generate_dictionary_html(source_sentence, tabfile_dictionary, source_language_ietf_code)}"
+
+            # if os.path.isfile(
+            #    os.path.join("audio_files/", f"{row['sentence_id']}.mp3")
+            # ):
+            if False:
 
                 note = genanki.Note(
                     model=audio_note_model,
                     fields=[
-                        html.escape(row["sentence_source"]),
+                        html.escape(source_sentence),
                         target_sentence_html,
-                        f"[sound:{row['sentence_id']}.mp3]",
+                        f"[sound:{source_sentence_id}.mp3]",
                     ],
                 )
             else:
                 note = genanki.Note(
                     model=no_audio_model,
                     fields=[
-                        html.escape(row["sentence_source"]),
+                        html.escape(source_sentence),
                         target_sentence_html,
                     ],
                 )
             # Add the note to the Anki deck
             deck.add_note(note)
+            card_num += 1
+            # Print the progress every 1000 sentences
+            if (card_num % 1000) == 0:
+                print(f"Added {card_num} cards")
 
         package.write_to_file(self.deck_output_path)
 
-adc = AnkiDeckCreator("Czech", "English")
-adc.create_database()
-adc.query_relevant_sentences()
+    def export_anki_deck(self):
+        print("Creating database...")
+        self.create_database()
+        print("Downloading dictionary...")
+        self.download_tabfile_dictionary()
+        print("Generating Anki deck...")
+        self.generate_anki_deck()
+
+    # Close the database connection when the object is garbage collected
+    def __del__(self):
+        self.conn.commit()
+        self.conn.close()
+
+
+if __name__ == "__main__":
+    adc = AnkiDeckCreator("Czech", "German")
+    adc.export_anki_deck()
