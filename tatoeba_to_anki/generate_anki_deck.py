@@ -31,7 +31,7 @@ def generate_dictionary_html(
     html = "<p>"
     for token in tokens:
         results = dictionary.lookup(token)
-        if results is not None:
+        if len(results) > 0:
             html += "<details><summary>" + token + "</summary>"
             for result in results:
                 html += f"<b>{result.word.strip()}</b>"

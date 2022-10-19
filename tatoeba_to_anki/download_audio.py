@@ -1,39 +1,79 @@
-import csv
+from dataclasses import dataclass
+from enum import Enum
 import os
 import random
-import tarfile
+import subprocess
 import time
 import requests
-from gtts import gTTS
+import edge_tts
 
 
-def get_sentences_with_audio(sentences_with_audio_path: str) -> dict[int, int]:
+@dataclass
+class Sentence:
+    sentence_id: int
+    sentence_text: str
+    sentence_tatoeba_audio_id: int
 
-    # Unpack the tar.bz2 sentences_with_audio file
-    with tarfile.open(sentences_with_audio_path, "r:bz2") as tar:
-        tar.extractall()
-    sentences_with_audio_tsv_path = "sentences_with_audio.csv"
 
-    sentences_with_audio: dict[int, int] = {}
-    with open(sentences_with_audio_tsv_path, "r", encoding="utf-8") as f:
-        reader = csv.reader(f, delimiter="\t")
-        for row in reader:
-            sentences_with_audio[int(row[0])] = int(row[1])
-    return sentences_with_audio
+DownloadMode = Enum("DownloadMode", "TATOEBA_AND_TTS TATOEBA NONE")
 
 
 class AudioDownloader:
     def __init__(
-        self, language: str, sentences_with_audio_path: str, audio_dir: str
+        self,
+        sentences_to_download: list[Sentence],
+        audio_dir: str,
+        tts_voices: str | list[str],
+        download_mode: DownloadMode,
+        wait_interval: float = 1.0,
     ) -> None:
         """
         Initialize the class.
         """
-        self.language = language
-        self.sentences_with_tatobea_audio = get_sentences_with_audio(
-            sentences_with_audio_path
-        )
         self.audio_dir = audio_dir
+        self.tts_voices = tts_voices
+        self.sentences_to_download = sentences_to_download
+        self.download_mode = download_mode
+        self.wait_interval = wait_interval
+
+    def waitonce(self):
+        # Multiply the wait interval by a random number between 0.5 and 1.5
+        waiting_time = self.wait_interval * (0.5 + (0.5 * random.random()))
+
+        time.sleep(waiting_time)
+
+    
+    def download_edge_audio_new(self, sentence: str,filename: str):
+        if isinstance(self.tts_voices, list):
+            voice = random.choice(self.tts_voices)
+        else:
+            voice = self.tts_voices
+    
+        with open(f"{filename}.txt", "w", encoding="utf-8") as f:
+            f.write(sentence)
+        command = f'edge-tts --file "{filename}.txt" --write-media "{filename}" --voice {voice}'
+        # Delete the text file
+        subprocess.check_output(command, shell=True)#
+        os.remove(f"{filename}.txt")
+
+    #def download_edge_audio_for_sentence(self, sentence: str, file_name: str) -> None:
+    #    # If voice is a list, pick a random voice
+    #    if isinstance(self.tts_voices, list):
+    #        voice = random.choice(self.tts_voices)
+    #    else:
+    #        voice = self.tts_voices
+    #    import asyncio
+#
+    #    async def download_audio_async():
+    #        communicate = edge_tts.Communicate()
+    #        with open(file_name, "wb") as fobj:
+    #            async for i in communicate.run(sentence, voice=voice):
+    #                if i[2] is not None:
+    #                    fobj.write(i[2])
+#
+    #    # asyncio.set_event_loop(asyncio.new_event_loop())
+    #    # asyncio.get_event_loop().run_until_complete(download_audio_async())
+    #    asyncio.run(download_audio_async())
 
     def get_audio_path(self, sentence_id: str) -> str:
         """
@@ -42,30 +82,27 @@ class AudioDownloader:
         return os.path.join(self.audio_dir, sentence_id + ".mp3")
 
     def download_audio(
-        self, sentence_id: int, sentence: str, wait_interval: float,  download_mode: str
+        self, sentence_id: int, sentence: str, sentence_tatoeba_audio_id: int
     ) -> None:
         """
         Download the audio file for the given sentence.
         """
 
-        if download_mode == "None":
+        if self.download_mode == DownloadMode.NONE:
             print("No audio download")
             return
-        
-        # Multiply the wait interval by a random number between 0.5 and 1.5
-        wait_interval = wait_interval * (0.5 + (0.5 * random.random()))
 
         # Check if an audio file with the given sentence_id exists.
-        audio_file_path = os.path.join(self.audio_dir, str(sentence_id) + ".mp3")
+        audio_file_path = os.path.join(self.audio_dir, f"{sentence_id}.mp3")
         if os.path.exists(audio_file_path):
             print("File already exists: " + audio_file_path)
             return
-        if sentence_id in self.sentences_with_tatobea_audio and download_mode != "Google":
-            print(f"Downloading audio for sentence_id: {sentence_id}")
+
+        self.waitonce()
+        if sentence_tatoeba_audio_id != None:
+            print(f"Downloading audio for sentence_id from Tatoeba: {sentence_id}")
             # Download the audio file using the given sentence_id using requests
-            url = "https://tatoeba.org/audio/download/" + str(
-                self.sentences_with_tatobea_audio[sentence_id]
-            )
+            url = f"https://tatoeba.org/audio/download/{sentence_tatoeba_audio_id}"
             response = requests.get(url, stream=True)
             with open(audio_file_path, "wb") as f:
                 for chunk in response.iter_content(chunk_size=1024):
@@ -73,12 +110,34 @@ class AudioDownloader:
                         f.write(chunk)
                         f.flush()
                 f.close()
-                print("Downloaded audio file: " + audio_file_path)
-            time.sleep(wait_interval)
-        elif download_mode != "Tatoeba":
-            # Download the audio file for the given sentence using gTTS
-            print("Downloading audio for sentence: " + sentence)
-            tts = gTTS(text=sentence, lang=self.language)
-            tts.save(audio_file_path)
+                print(f"Downloaded audio file: {audio_file_path}")
+
+        else:
+            # Download the audio file for the given sentence using edge-tts
+            print(f"Downloading audio for sentence: {sentence}")
+            # tts = gTTS(text=sentence, lang=self.language)
+            # tts.save(audio_file_path)
+            self.download_edge_audio_new(sentence, audio_file_path)
             print("Downloaded audio file: " + audio_file_path)
-            time.sleep(wait_interval)
+            self.waitonce()
+
+    def download_all_audio(self):
+        # Create the audio directory if it doesn't exist
+        if not os.path.exists(self.audio_dir):
+            os.makedirs(self.audio_dir)
+        for sentence in self.sentences_to_download:
+            self.download_audio(
+                sentence.sentence_id,
+                sentence.sentence_text,
+                sentence.sentence_tatoeba_audio_id,
+            )
+
+
+if __name__ == "__main__":
+    voice1 = "cs-CZ-VlastaNeural"
+    voice = "cs-CZ-AntoninNeural"
+
+    ad = AudioDownloader([], "test_aud", voice1, DownloadMode.TATOEBA_AND_TTS)
+    ad.download_edge_audio_new(
+        "Ta by měla vznikat za nového zadání.", "test3.mp3"
+    )
