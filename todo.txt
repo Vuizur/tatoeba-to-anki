@@ -6,19 +6,18 @@
 
 *Don't add that many cards for the same "hardest" bolded word
 
-*Find a way to reduce the number of sentences (not a problem for Czech-German, but for other languages surely)
-->Set the max sentence limit (and fix this, currently broken)
-
 *Filter out names out of the sentence difficulty calculation?
 
 *Give higher weight to the rarest word?
 
-*Add alternative translations (possibly hidden behind details tag) -> If source sentence is duplicate
-
 *At the end create a shared Google Docs document about how to learn Czech efficiently
-*To je vsechno -> duplicate with other punctuation exists (unfortunately), but shouldn't
 
 *Use the ebook creator library to get the tabfile dictionary programmatically
 
-*Remove sentences by non-native speakers
 *When finished, promote
+
+Set waiting time
+
+Fix creating cards without audio/Tatoeba only download
+
+Fix Spanish/Italian/French/etc on ebookreadertools

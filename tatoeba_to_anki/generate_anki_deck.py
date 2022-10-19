@@ -1,7 +1,3 @@
-import html
-import os
-import genanki
-import pandas as pd
 import wordfreq
 
 #from tabfiledictionary import SimpleTabfileDictionary

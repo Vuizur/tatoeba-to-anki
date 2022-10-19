@@ -36,7 +36,7 @@ class AnkiDeckCreator:
         audio_folder="audio",
         dictionary_tabfile_path=None,
         minimum_skill_level=4,
-        number_of_common_sentences_where_minimum_skill_level_should_not_be_applied=200,
+        number_of_common_sentences_where_minimum_skill_level_should_not_be_applied=100,
         download_and_create_english_dictionary=True,
         audio_download_mode=DownloadMode.TATOEBA_AND_TTS,
         in_memory_database=False,  # This currently does not work, do not change it.
@@ -46,6 +46,7 @@ class AnkiDeckCreator:
         deck_author="Vuizur",
         max_sentence_number=9001,
         deck_id=None,
+        waiting_time=0.5,
     ):
         if deck_id == None:
             # Hash the source and target language to get a unique deck id
@@ -106,6 +107,7 @@ class AnkiDeckCreator:
         )
         self.deck_author = deck_author
         self.max_sentence_number = max_sentence_number
+        self.waiting_time = waiting_time
 
     def create_database(self):
 
@@ -428,15 +430,16 @@ class AnkiDeckCreator:
             self.audio_folder,
             self.tts_voices,
             self.download_mode,
+            self.waiting_time,
         )
         ad.download_all_audio()
+        if self.download_mode != DownloadMode.NONE:
+            audiofile_paths = [
+                f"{self.audio_folder}/{source_sentence_id}.mp3"
+                for source_sentence_id, _, _, _ in sentences
+            ]
 
-        audiofile_paths = [
-            f"{self.audio_folder}/{source_sentence_id}.mp3"
-            for source_sentence_id, _, _, _ in sentences
-        ]
-
-        package.media_files = audiofile_paths
+            package.media_files = audiofile_paths
 
         tabfile_dictionary = TabfileDictionary(self.dictionary_tabfile_path)
 
@@ -445,7 +448,10 @@ class AnkiDeckCreator:
         for source_sentence_id, source_sentence, translation, audio_id in sentences:
             target_sentence_html = f"{html.escape(translation)}{generate_dictionary_html(source_sentence, tabfile_dictionary, source_language_ietf_code)}"
 
-            if os.path.isfile(f"{self.audio_folder}/{source_sentence_id}.mp3"):
+            if (
+                os.path.isfile(f"{self.audio_folder}/{source_sentence_id}.mp3")
+                and not self.download_mode == DownloadMode.NONE
+            ):
                 # if False:
                 note = genanki.Note(
                     model=audio_note_model,
