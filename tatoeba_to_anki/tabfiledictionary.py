@@ -9,9 +9,9 @@ class Entry:
 
 class SimpleTabfileDictionary:
 
-    def __init__(self, filename):
+    def __init__(self, filename: str):
         self.filename = filename
-        self.entry_list = []
+        self.entry_list: list[Entry] = []
 
         self.read_dictionary()
 

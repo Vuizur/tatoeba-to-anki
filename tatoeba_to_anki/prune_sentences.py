@@ -14,6 +14,17 @@ def delete_punctuation(sentence: str) -> str:
         .replace(":", "")
         .replace(";", "")
         .replace("!", "")
+        .replace("?", "")
+        .replace("(", "")
+        .replace(")", "")
+        .replace("[", "")
+        .replace("]", "")
+        .replace("{", "")
+        .replace("}", "")
+        .replace('"', "")
+        .replace("'", "")
+        .replace("„", "")
+        .replace("“", "")
     )
 
 
