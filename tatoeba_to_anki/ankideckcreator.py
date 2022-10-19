@@ -5,12 +5,11 @@ import pycountry
 
 from sqlalchemy import create_engine, Index
 import sqlite3
-from sort_sentences import get_sentence_word_frequency
+from tatoeba_to_anki.sort_sentences import get_sentence_word_frequency
 from ebook_dictionary_creator.e_dictionary_creator.dictionary_creator import (
     DictionaryCreator,
 )
 import genanki
-
 from tatoebatools import tatoeba
 from tatoebatools.models import (
     Base,
@@ -21,11 +20,10 @@ from tatoebatools.models import (
     Tag,
 )
 
-from generate_anki_deck import generate_dictionary_html
+from tatoeba_to_anki.generate_anki_deck import generate_dictionary_html
 from tabfile_dictionary import TabfileDictionary
-
-from prune_sentences import delete_punctuation
-from download_audio import AudioDownloader, DownloadMode, Sentence
+from tatoeba_to_anki.prune_sentences import delete_punctuation
+from tatoeba_to_anki.download_audio import AudioDownloader, DownloadMode, Sentence
 
 
 class AnkiDeckCreator:
@@ -41,13 +39,13 @@ class AnkiDeckCreator:
         number_of_common_sentences_where_minimum_skill_level_should_not_be_applied=200,
         download_and_create_english_dictionary=True,
         audio_download_mode=DownloadMode.TATOEBA_AND_TTS,
-        in_memory_database=False, # This currently does not work, do not change it.
+        in_memory_database=False,  # This currently does not work, do not change it.
         deck_output_path=None,
         deck_name=None,
         deck_description=None,
         deck_author="Vuizur",
-        max_sentence_number=90000,
-        deck_id = None
+        max_sentence_number=9001,
+        deck_id=None,
     ):
         if deck_id == None:
             # Hash the source and target language to get a unique deck id
@@ -65,8 +63,8 @@ class AnkiDeckCreator:
             name=self.target_language
         ).alpha_3
 
-        #self.deck_id = deck_id
-        #self.model_id = model_id
+        # self.deck_id = deck_id
+        # self.model_id = model_id
         if not in_memory_database:
             self.database_name = (
                 f"{self.source_language_code}_{self.target_language_code}.sqlite"
@@ -486,12 +484,3 @@ class AnkiDeckCreator:
     def __del__(self):
         self.conn.commit()
         self.conn.close()
-
-
-if __name__ == "__main__":
-    # adc = AnkiDeckCreator("Czech", "German", max_sentence_number=4, tts_voices="cs-CZ-VlastaNeural")
-    adc = AnkiDeckCreator(
-        "Polish", "English", max_sentence_number=15, tts_voices="pl-PL-ZofiaNeural", in_memory_database=False
-    )
-    
-    adc.export_anki_deck()

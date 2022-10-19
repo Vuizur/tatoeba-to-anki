@@ -8,16 +8,13 @@ The ordering algorithm takes the average frequency of each sentence and sentence
 
 It also removes duplicates. 
 
-Additionally it supports the generation of automatic help to lookup single words directly on the back of the card. By default, it downloads a dictionary for this automatically. You can also pass a custom tabfile dictionary (use [pyglossary](https://github.com/ilius/pyglossary) to convert other dictionaries).
+Additionally it supports the generation of automatic help to lookup single words directly on the back of the card. By default, it downloads a dictionary for this automatically (limited to English definitions currently). You can also pass a custom tabfile dictionary (use [pyglossary](https://github.com/ilius/pyglossary) to convert other dictionaries).
 
 It should work for all languages pairs.
 
 ### Running it
 
-Then should clone the project, install poetry and then run `poetry install`. 
-Move the sentence pair files and sentences_with_audio.tar.bz2 into the root folder and edit the settings in `config.toml` to set the names of the relevant input/output files, the language and some other settings.
-
-Then run `poetry run python ./tatoeba_to_anki/main.py` for the program to generate the Anki deck.
+You should install it with `pip install git+https://github.com/Vuizur/tatoeba-to-anki` or `poetry add git+https://github.com/Vuizur/tatoeba-to-anki`.
 
 I plan on adding more features, you can open an issue if you think something should be changed/improved or send a pull request.
 
