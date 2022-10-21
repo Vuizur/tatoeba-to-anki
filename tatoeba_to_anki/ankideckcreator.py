@@ -1,3 +1,4 @@
+from os.path import isfile
 import html
 import os
 
@@ -46,7 +47,7 @@ class AnkiDeckCreator:
         deck_author="Vuizur",
         max_sentence_number=9001,
         deck_id=None,
-        waiting_time=0.5,
+        waiting_time=0.25,
     ):
         if deck_id == None:
             # Hash the source and target language to get a unique deck id
@@ -83,6 +84,10 @@ class AnkiDeckCreator:
             self.dictionary_tabfile_path = (
                 f"{self.source_language_code}_{self.target_language_code}.txt"
             )
+        else:
+            self.dictionary_tabfile_path = dictionary_tabfile_path
+
+        self.download_and_create_english_dictionary = download_and_create_english_dictionary
 
         if deck_output_path == None:
             self.deck_output_path = (
@@ -223,12 +228,41 @@ class AnkiDeckCreator:
         self.prune_duplicates()
         self.delete_sentences_over_max_sentence_number()
 
-    def delete_sentences_over_max_sentence_number(self):
+    def delete_sentences_over_max_sentence_number(self, prefer_sentences_where_audio_already_has_been_downloaded=True):
         # TODO: Fix this
         unique_words: set[str] = set()
         sentences_that_contain_unique_words: set[int] = set()
+
+        # Select all sentences that have native audio so that we have all of them
+        result = self.cur.execute(f"""
+                SELECT
+                stwtd.source_sentence_id
+                FROM sentences_with_translations stwtd
+                WHERE stwtd.audio_id IS NOT NULL
+                ORDER BY frequency DESC
+                LIMIT {self.max_sentence_number}
+        """).fetchall()
+        sentences_that_contain_unique_words.update([entry[0] for entry in result])
+
+        # Look in the audio files folder and get all file names
+        already_downloaded_file_ids = [
+            f.replace(".mp3","") for f in os.listdir(self.audio_folder) if isfile(os.path.join(self.audio_folder, f))
+        ]
+        # Select all sentences in the source language that have one of the already_downloaded_file_ids associated with them
+        result = self.cur.execute(f"""
+                SELECT
+                stwtd.source_sentence_id
+                FROM sentences_with_translations stwtd
+                WHERE stwtd.audio_id IN ({",".join(already_downloaded_file_ids)})
+                ORDER BY frequency DESC
+                LIMIT {self.max_sentence_number}
+            """).fetchall()
+        # Add the sentences to the set, but the set should not grow larger than max_sentence_number
+        max_num_of_sentences_to_add = self.max_sentence_number - len(sentences_that_contain_unique_words)
+        sentences_that_contain_unique_words.update([entry[0] for entry in result][:max_num_of_sentences_to_add])
+
         for row in self.cur.execute(
-            """SELECT source_sentence_id, source_text FROM sentences_with_translations ORDER BY frequency DESC"""
+            """SELECT source_sentence_id, source_text FROM sentences_with_translations ORDER BY audio_id IS NULL, frequency DESC"""
         ):
             # Check if the sentence contains at least one unique word
             unique_words_of_the_sentence = (
@@ -244,13 +278,13 @@ class AnkiDeckCreator:
             # Add random sentences to reach the max_sentence_number
             for row in self.cur.execute(
                 "SELECT source_sentence_id FROM sentences_with_translations ORDER BY RANDOM() LIMIT ?",
-                (self.source_language_code, self.max_sentence_number),
+                (self.max_sentence_number,),
             ):
                 if len(sentences_that_contain_unique_words) >= self.max_sentence_number:
                     break
                 sentences_that_contain_unique_words.add(row[0])
 
-        # This bit is broken
+        # This bit was? broken
         translation_ids_to_keep = []
         for row in self.cur.execute(
             "SELECT translation_id FROM links WHERE sentence_id IN ({})".format(
@@ -441,13 +475,16 @@ class AnkiDeckCreator:
 
             package.media_files = audiofile_paths
 
-        tabfile_dictionary = TabfileDictionary(self.dictionary_tabfile_path)
+        if self.dictionary_tabfile_path is not None:
+            tabfile_dictionary = TabfileDictionary(self.dictionary_tabfile_path)
 
         card_num = 0
 
         for source_sentence_id, source_sentence, translation, audio_id in sentences:
-            target_sentence_html = f"{html.escape(translation)}{generate_dictionary_html(source_sentence, tabfile_dictionary, source_language_ietf_code)}"
-
+            if self.dictionary_tabfile_path is not None:
+                target_sentence_html = f"{html.escape(translation)}{generate_dictionary_html(source_sentence, tabfile_dictionary, source_language_ietf_code)}"
+            else:
+                target_sentence_html = f"{html.escape(translation)}"
             if (
                 os.path.isfile(f"{self.audio_folder}/{source_sentence_id}.mp3")
                 and not self.download_mode == DownloadMode.NONE
@@ -481,8 +518,9 @@ class AnkiDeckCreator:
     def export_anki_deck(self):
         print("Creating database...")
         self.create_database()
-        print("Downloading dictionary...")
-        self.download_tabfile_dictionary()
+        if self.download_and_create_english_dictionary:
+            print("Downloading dictionary...")
+            self.download_tabfile_dictionary()
         print("Generating Anki deck...")
         self.generate_anki_deck()
 
@@ -490,3 +528,12 @@ class AnkiDeckCreator:
     def __del__(self):
         self.conn.commit()
         self.conn.close()
+
+    def create_ankiweb_info(self, final_number_of_sentences: int):
+        title = f"{self.source_language} {final_number_of_sentences} sentences with audio, ordered by difficulty + containing word definitions"
+        description = f"""This deck contains {final_number_of_sentences} {self.source_language} sentences with audio ordered by difficulty. 
+        
+        Additionally, it includes the definitions of individual words from Wiktionary directly written on the cards so that you don't have to look them up online.
+
+        The deck has been created with my open source program [tatoeba-to-anki](https://github.com/Vuizur/tatoeba-to-anki). So if you find any errors or have feedback, you can also open an issue there.
+        """
