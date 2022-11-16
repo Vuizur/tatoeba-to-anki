@@ -36,7 +36,7 @@ class AnkiDeckCreator:
         outdated_tags: list[str] = ["outdated, old-fashioned"],
         audio_folder="audio",
         dictionary_tabfile_path=None,
-        minimum_skill_level=4,
+        minimum_skill_level=5,
         number_of_common_sentences_where_minimum_skill_level_should_not_be_applied=100,
         download_and_create_english_dictionary=True,
         audio_download_mode=DownloadMode.TATOEBA_AND_TTS,
@@ -79,6 +79,10 @@ class AnkiDeckCreator:
 
         self.audio_folder = audio_folder
 
+        # if audio folder does not exist, create it
+        if not os.path.exists(self.audio_folder):
+            os.makedirs(self.audio_folder)
+
         self.minimum_skill_level = minimum_skill_level
         if dictionary_tabfile_path == None and download_and_create_english_dictionary:
             self.dictionary_tabfile_path = (
@@ -87,7 +91,9 @@ class AnkiDeckCreator:
         else:
             self.dictionary_tabfile_path = dictionary_tabfile_path
 
-        self.download_and_create_english_dictionary = download_and_create_english_dictionary
+        self.download_and_create_english_dictionary = (
+            download_and_create_english_dictionary
+        )
 
         if deck_output_path == None:
             self.deck_output_path = (
@@ -228,41 +234,53 @@ class AnkiDeckCreator:
         self.prune_duplicates()
         self.delete_sentences_over_max_sentence_number()
 
-    def delete_sentences_over_max_sentence_number(self, prefer_sentences_where_audio_already_has_been_downloaded=True):
+    def delete_sentences_over_max_sentence_number(
+        self,  # , prefer_sentences_where_audio_already_has_been_downloaded=True
+    ):
         # TODO: Fix this
         unique_words: set[str] = set()
         sentences_that_contain_unique_words: set[int] = set()
 
         # Select all sentences that have native audio so that we have all of them
-        result = self.cur.execute(f"""
+        result = self.cur.execute(
+            f"""
                 SELECT
                 stwtd.source_sentence_id
                 FROM sentences_with_translations stwtd
                 WHERE stwtd.audio_id IS NOT NULL
-                ORDER BY frequency DESC
+                ORDER BY source_lang_skill_level DESC, frequency DESC
                 LIMIT {self.max_sentence_number}
-        """).fetchall()
+        """
+        ).fetchall()
         sentences_that_contain_unique_words.update([entry[0] for entry in result])
 
         # Look in the audio files folder and get all file names
         already_downloaded_file_ids = [
-            f.replace(".mp3","") for f in os.listdir(self.audio_folder) if isfile(os.path.join(self.audio_folder, f))
+            f.replace(".mp3", "")
+            for f in os.listdir(self.audio_folder)
+            if isfile(os.path.join(self.audio_folder, f))
         ]
         # Select all sentences in the source language that have one of the already_downloaded_file_ids associated with them
-        result = self.cur.execute(f"""
+        result = self.cur.execute(
+            f"""
                 SELECT
                 stwtd.source_sentence_id
                 FROM sentences_with_translations stwtd
                 WHERE stwtd.audio_id IN ({",".join(already_downloaded_file_ids)})
-                ORDER BY frequency DESC
+                ORDER BY source_lang_skill_level DESC, frequency DESC
                 LIMIT {self.max_sentence_number}
-            """).fetchall()
+            """
+        ).fetchall()
         # Add the sentences to the set, but the set should not grow larger than max_sentence_number
-        max_num_of_sentences_to_add = self.max_sentence_number - len(sentences_that_contain_unique_words)
-        sentences_that_contain_unique_words.update([entry[0] for entry in result][:max_num_of_sentences_to_add])
+        max_num_of_sentences_to_add = self.max_sentence_number - len(
+            sentences_that_contain_unique_words
+        )
+        sentences_that_contain_unique_words.update(
+            [entry[0] for entry in result][:max_num_of_sentences_to_add]
+        )
 
         for row in self.cur.execute(
-            """SELECT source_sentence_id, source_text FROM sentences_with_translations ORDER BY audio_id IS NULL, frequency DESC"""
+            """SELECT source_sentence_id, source_text FROM sentences_with_translations ORDER BY audio_id IS NULL, source_lang_skill_level DESC, frequency DESC"""
         ):
             # Check if the sentence contains at least one unique word
             unique_words_of_the_sentence = (
@@ -530,10 +548,15 @@ class AnkiDeckCreator:
         self.conn.close()
 
     def create_ankiweb_info(self, final_number_of_sentences: int):
-        title = f"{self.source_language} {final_number_of_sentences} sentences with audio, ordered by difficulty + containing word definitions"
+        title = f"{final_number_of_sentences} {self.source_language} sentences with audio, ordered by difficulty + containing word definitions"
         description = f"""This deck contains {final_number_of_sentences} {self.source_language} sentences with audio ordered by difficulty. 
         
-        Additionally, it includes the definitions of individual words from Wiktionary directly written on the cards so that you don't have to look them up online.
+Additionally, it includes the definitions of individual words from Wiktionary directly written on the cards so that you don't have to look them up online.
 
-        The deck has been created with my open source program [tatoeba-to-anki](https://github.com/Vuizur/tatoeba-to-anki). So if you find any errors or have feedback, you can also open an issue there.
+The deck has been created with my open source program [tatoeba-to-anki](https://github.com/Vuizur/tatoeba-to-anki). So if you find any errors or have feedback, you can also open an issue there.
         """
+
+        # Print the AnkiWeb info to a file
+        with open(f"{self.deck_output_path}.ankiweb_info", "w") as f:
+            f.write(f"title: {title}\n")
+            f.write(f"description: {description}\n")

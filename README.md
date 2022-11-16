@@ -33,11 +33,11 @@ The parameter tts_voices is one (or a list) of the Edge TTS voices. For choosing
 I plan on adding more features, you can open an issue if you think something should be changed/improved or send a pull request.
 
 ### Acknowledgements
-I thank the authors of the Tatoeba project, LBeaudoux (the creator of TatoebaTools) and Tatu Ylonen and the other contributors of the Wiktextract project for their hard work.
+I thank the authors of the Tatoeba project, LBeaudoux (the creator of [TatoebaTools](https://github.com/LBeaudoux/tatoebatools)) and Tatu Ylonen and the other contributors of the Wiktextract project for their hard work.
 
 ### Interesting other projects:
 * This [project for generating Swedish cards](https://github.com/vvpd/anki_swedish) is pretty sophisticated and is probably worth understanding more fully
 
 * [Sentence pairs](https://github.com/kmicklas/sentence-pairs) is a pretty simple package which has given me the idea of using the wordfreq package
 
-* Older solutions such as [Tatoeba-Ankigeneration](https://github.com/alexanderk409/Tatoeba-anki-deckgeneration) scrape parts of the site by themselves, but that should not be necessary anymore with the new downloadable data
+* Older solutions such as [Tatoeba-Ankigeneration](https://github.com/alexanderk409/Tatoeba-anki-deckgeneration) scrape parts of the site by themselves, but that is not necessary anymore with the new downloadable data

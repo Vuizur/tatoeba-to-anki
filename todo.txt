@@ -22,4 +22,7 @@ Fix creating cards without audio/Tatoeba only download
 
 Fix Spanish/Italian/French/etc on ebookreadertools
 
-Add a lemmatizer so that the dictionary has not to do it
+Add a lemmatizer so that the dictionary does not have to do it
+
+Add more dictionaries, so that we can get Spanish definitions for English words, for example.
+
