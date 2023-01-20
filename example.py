@@ -4,12 +4,12 @@ from tatoeba_to_anki.download_audio import DownloadMode
 if __name__ == "__main__":
 
     adc = AnkiDeckCreator(
-        "Polish",
+        "Czech",
         "English",
-        max_sentence_number=9000,
+        max_sentence_number=4,
         tts_voices="pl-PL-ZofiaNeural",
-        in_memory_database=False,
     )
+    adc.export_anki_deck()
     adc.create_ankiweb_info(9000)
 
     #adc.export_anki_deck()

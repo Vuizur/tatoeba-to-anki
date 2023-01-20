@@ -2,9 +2,15 @@ from dataclasses import dataclass
 from enum import Enum
 import os
 import random
-import subprocess
 import time
 import requests
+import edge_tts
+import asyncio
+
+
+async def download_edge(text: str, voice: str, output_path: str) -> None:
+    communicate = edge_tts.Communicate(text, voice)
+    await communicate.save(output_path)
 
 
 @dataclass
@@ -15,6 +21,7 @@ class Sentence:
 
 
 DownloadMode = Enum("DownloadMode", "TATOEBA_AND_TTS TATOEBA NONE")
+
 
 class AudioDownloader:
     def __init__(
@@ -40,19 +47,24 @@ class AudioDownloader:
 
         time.sleep(waiting_time)
 
-    
-    def download_edge_audio_new(self, sentence: str,filename: str):
+    def download_edge_audio_new(self, sentence: str, filename: str):
         if isinstance(self.tts_voices, list):
             voice = random.choice(self.tts_voices)
         else:
             voice = self.tts_voices
-    
-        with open(f"{filename}.txt", "w", encoding="utf-8") as f:
-            f.write(sentence)
-        command = f'edge-tts --file "{filename}.txt" --write-media "{filename}" --voice {voice}'
-        # Delete the text file
-        subprocess.check_output(command, shell=True)#
-        os.remove(f"{filename}.txt")
+
+        asyncio.get_event_loop().run_until_complete(
+            download_edge(sentence, voice, filename)
+        )
+
+        # with open(f"{filename}.txt", "w", encoding="utf-8") as f:
+        #    f.write(sentence)
+
+    #
+    # command = f'edge-tts --file "{filename}.txt" --write-media "{filename}" --voice {voice}'
+    ## Delete the text file
+    # subprocess.check_output(command, shell=True)#
+    # os.remove(f"{filename}.txt")
 
     def get_audio_path(self, sentence_id: str) -> str:
         """
@@ -93,7 +105,7 @@ class AudioDownloader:
 
         else:
             if self.download_mode == DownloadMode.TATOEBA_AND_TTS:
-            # Download the audio file for the given sentence using edge-tts
+                # Download the audio file for the given sentence using edge-tts
                 print(f"Downloading audio for sentence: {sentence}")
                 # tts = gTTS(text=sentence, lang=self.language)
                 # tts.save(audio_file_path)
@@ -121,6 +133,4 @@ if __name__ == "__main__":
     voice = "cs-CZ-AntoninNeural"
 
     ad = AudioDownloader([], "test_aud", voice1, DownloadMode.TATOEBA_AND_TTS)
-    ad.download_edge_audio_new(
-        "Ta by měla vznikat za nového zadání.", "test3.mp3"
-    )
+    ad.download_edge_audio_new("Ta by měla vznikat za nového zadání.", "test3.mp3")

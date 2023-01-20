@@ -49,7 +49,7 @@ class AnkiDeckCreator:
         deck_id=None,
         waiting_time=0.25,
     ):
-        if deck_id == None:
+        if deck_id is None:
             # Hash the source and target language to get a unique deck id
             self.deck_id = hash(source_language + target_language)
         else:
@@ -57,7 +57,8 @@ class AnkiDeckCreator:
 
         self.source_language = source_language
         self.target_language = target_language
-        # Convert the source language ("English") to the language code ("eng") using pycountry
+        # Convert the source language ("English") to the language code ("eng")
+        # using pycountry
         self.source_language_code = pycountry.languages.get(
             name=self.source_language
         ).alpha_3
@@ -84,7 +85,7 @@ class AnkiDeckCreator:
             os.makedirs(self.audio_folder)
 
         self.minimum_skill_level = minimum_skill_level
-        if dictionary_tabfile_path == None and download_and_create_english_dictionary:
+        if dictionary_tabfile_path is None and download_and_create_english_dictionary:
             self.dictionary_tabfile_path = (
                 f"{self.source_language_code}_{self.target_language_code}.txt"
             )
@@ -95,19 +96,19 @@ class AnkiDeckCreator:
             download_and_create_english_dictionary
         )
 
-        if deck_output_path == None:
+        if deck_output_path is None:
             self.deck_output_path = (
                 f"{self.source_language_code}_{self.target_language_code}.apkg"
             )
         else:
             self.deck_output_path = deck_output_path
 
-        if deck_name == None:
+        if deck_name is None:
             self.deck_name = f"{self.source_language} - {self.target_language} frequency sentences deck"
         else:
             self.deck_name = deck_name
 
-        if deck_description == None:
+        if deck_description is None:
             self.deck_description = f"Frequency sentences deck for {self.source_language} - {self.target_language}"
         else:
             self.deck_description = deck_description
@@ -236,7 +237,7 @@ class AnkiDeckCreator:
 
     def delete_sentences_over_max_sentence_number(
         self,  # , prefer_sentences_where_audio_already_has_been_downloaded=True
-    ):
+    )-> None:
         # TODO: Fix this
         unique_words: set[str] = set()
         sentences_that_contain_unique_words: set[int] = set()
@@ -295,7 +296,8 @@ class AnkiDeckCreator:
         if len(sentences_that_contain_unique_words) < self.max_sentence_number:
             # Add random sentences to reach the max_sentence_number
             for row in self.cur.execute(
-                "SELECT source_sentence_id FROM sentences_with_translations ORDER BY RANDOM() LIMIT ?",
+                """SELECT source_sentence_id FROM sentences_with_translations 
+                ORDER BY RANDOM() LIMIT ?""",
                 (self.max_sentence_number,),
             ):
                 if len(sentences_that_contain_unique_words) >= self.max_sentence_number:
@@ -344,7 +346,8 @@ class AnkiDeckCreator:
 
         # Keep only one translation per source sentence
         self.cur.execute(
-            "SELECT sentence_id, translation_id FROM links WHERE sentence_id IN (SELECT sentence_id FROM sentences_detailed WHERE lang = ?)",
+            """SELECT sentence_id, translation_id FROM links WHERE sentence_id IN 
+            (SELECT sentence_id FROM sentences_detailed WHERE lang = ?)""",
             (self.source_language_code,),
         )
         rows = self.cur.fetchall()
