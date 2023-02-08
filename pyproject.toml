@@ -6,14 +6,14 @@ version = "0.1.0"
 
 [tool.poetry.dependencies]
 ebook-dictionary-creator = {git = "https://github.com/Vuizur/ebook_dictionary_creator"}
-edge-tts = "^5.0.6"
-genanki = "^0.13.0"
-gtts = "^2.2.4"
-pandas = "^1.5.0"
-python = "^3.10"
+edge-tts = ">=5.0.6"
+genanki = ">=0.13.0"
+gtts = ">=2.2.4"
+pandas = ">=1.5.0"
+python = "^3.8, <3.11" # Tatoebatools is not compatible with Python 3.11 yet
 tabfile-dictionary = {git = "https://github.com/Vuizur/tabfile-dictionary"}
-tatoebatools = "^0.2.1"
-wordfreq = {extras = ["cjk"], version = "^3.0.2"}
+tatoebatools = ">=0.2.1"
+wordfreq = {extras = ["cjk"], version = ">=3.0.2"}
 
 [tool.poetry.dev-dependencies]
 black = {version = "^22.3.0", allow-prereleases = true}
