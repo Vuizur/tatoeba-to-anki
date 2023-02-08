@@ -47,7 +47,7 @@ class AnkiDeckCreator:
         deck_author="Vuizur",
         max_sentence_number=9001,
         deck_id=None,
-        waiting_time=0.25,
+        waiting_time=0.10,
     ):
         if deck_id is None:
             # Hash the source and target language to get a unique deck id
