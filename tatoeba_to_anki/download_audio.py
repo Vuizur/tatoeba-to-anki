@@ -18,12 +18,12 @@ async def get_correct_voices(language: str, gender: str) -> list[str]:
     return voices.find(Language=language, Gender=gender)
 
 def get_available_voices(language_code: str, gender: str = "Female") -> list[str]: # We choose random female voices -> Only one gender because otherwise people would get confused that gender-specific
-    """The language code has to be 2 letters long."""
-    # sentences get voiced by the wrong gender
+    """The language code has to be 2 letters long."""                              # sentences get voiced by the wrong gender
+
     available_voices = asyncio.get_event_loop().run_until_complete(
         get_correct_voices(language=language_code, gender=gender)
     )
-    return available_voices
+    return [voice["ShortName"] for voice in available_voices]
 
 async def all_langs() -> list[str]:
     voices = await VoicesManager.create()
@@ -32,7 +32,7 @@ async def all_langs() -> list[str]:
 def get_all_languages() -> list[str]:
     """Get all voices."""
     voices: dict = asyncio.get_event_loop().run_until_complete(
-        all_langs()
+        all_langs() # type: ignore
     )
     # Find all unique language keys
     languages = set()

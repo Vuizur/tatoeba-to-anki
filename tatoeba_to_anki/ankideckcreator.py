@@ -24,7 +24,7 @@ from tatoebatools.models import (
 from tatoeba_to_anki.generate_anki_deck import generate_dictionary_html
 from tabfile_dictionary import TabfileDictionary
 from tatoeba_to_anki.prune_sentences import delete_punctuation
-from tatoeba_to_anki.download_audio import AudioDownloader, DownloadMode, Sentence
+from tatoeba_to_anki.download_audio import AudioDownloader, DownloadMode, Sentence, get_available_voices
 
 
 class AnkiDeckCreator:
@@ -32,7 +32,7 @@ class AnkiDeckCreator:
         self,
         source_language: str,
         target_language: str,
-        tts_voices: str | list[str],
+        tts_voices: str | list[str] | None = None, # Will be figured out by the program if None
         outdated_tags: list[str] = ["outdated, old-fashioned"],
         audio_folder="audio",
         dictionary_tabfile_path=None,
@@ -76,7 +76,12 @@ class AnkiDeckCreator:
             self.database_name = ":memory:"
         self.outdated_tags = outdated_tags
         self.download_mode = audio_download_mode
-        self.tts_voices = tts_voices
+
+        if tts_voices is None:
+            self.tts_voices = get_available_voices(pycountry.languages.get(
+            name=self.source_language).alpha_2)
+        else:
+            self.tts_voices = tts_voices
 
         self.audio_folder = audio_folder
 
