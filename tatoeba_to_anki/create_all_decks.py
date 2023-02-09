@@ -25,16 +25,19 @@ class AllDeckCreator:
     def create_decks_for_all_languages(self) -> None:
         """Create decks for all languages."""
         langs = get_all_langs_that_have_voice_and_word_frequency()
+        # Sort the languages alphabetically
+        langs.sort()
         for lang in langs:
             if lang in self.langs_already_done and lang != "en":
                 continue
+            if lang == "ms":
+                continue #TODO There are some issues with language codes, must investivate 
             print(lang)
             lang_name = pycountry.languages.get(alpha_2=lang).name
             adc = AnkiDeckCreator(
                 lang_name,
                 "English",
                 max_sentence_number=9001,
-                tts_voices=[],
             )
             adc.export_anki_deck()
             with open(self.progress_file, "a", encoding="utf-8") as f:

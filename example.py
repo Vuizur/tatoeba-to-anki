@@ -7,8 +7,9 @@ if __name__ == "__main__":
         "Czech",
         "English",
         max_sentence_number=4,
-        tts_voices="pl-PL-ZofiaNeural",
+        tts_voices=None#"pl-PL-ZofiaNeural",
     )
+    print(adc.tts_voices)
     adc.export_anki_deck()
     adc.create_ankiweb_info(9000)
 

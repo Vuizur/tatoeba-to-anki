@@ -47,7 +47,7 @@ class AnkiDeckCreator:
         deck_author="Vuizur",
         max_sentence_number=9001,
         deck_id=None,
-        waiting_time=0.10,
+        waiting_time=0.20,
     ):
         if deck_id is None:
             # Hash the source and target language to get a unique deck id
@@ -78,8 +78,9 @@ class AnkiDeckCreator:
         self.download_mode = audio_download_mode
 
         if tts_voices is None:
-            self.tts_voices = get_available_voices(pycountry.languages.get(
-            name=self.source_language).alpha_2)
+            lang_code = pycountry.languages.get(name=self.source_language).alpha_2
+            self.tts_voices = get_available_voices(lang_code)
+            print(self.tts_voices)
         else:
             self.tts_voices = tts_voices
 
@@ -551,9 +552,9 @@ class AnkiDeckCreator:
         self.generate_anki_deck()
 
     # Close the database connection when the object is garbage collected (Note: this might be buggy)
-    def __del__(self):
-        self.conn.commit()
-        self.conn.close()
+    #def __del__(self):
+    #    self.conn.commit()
+    #    self.conn.close()
 
     def create_ankiweb_info(self, final_number_of_sentences: int):
         title = f"{final_number_of_sentences} {self.source_language} sentences with audio, ordered by difficulty + containing word definitions"

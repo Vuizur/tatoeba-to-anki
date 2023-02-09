@@ -42,3 +42,5 @@ ces_deu.txt
 *.apkg
 lat_eng.txt
 *.ankiweb_info
+*.txt
+*.db-journal
