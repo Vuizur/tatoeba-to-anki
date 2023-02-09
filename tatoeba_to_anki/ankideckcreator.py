@@ -26,6 +26,7 @@ from tabfile_dictionary import TabfileDictionary
 from tatoeba_to_anki.prune_sentences import delete_punctuation
 from tatoeba_to_anki.download_audio import AudioDownloader, DownloadMode, Sentence, get_available_voices
 
+FORBIDDEN_LOCALES = ["de-CH"] # Sorry friends from Switzerland
 
 class AnkiDeckCreator:
     def __init__(
@@ -79,7 +80,7 @@ class AnkiDeckCreator:
 
         if tts_voices is None:
             lang_code = pycountry.languages.get(name=self.source_language).alpha_2
-            self.tts_voices = get_available_voices(lang_code)
+            self.tts_voices = [voice for voice in get_available_voices(lang_code) if not any(voice.startswith(forbidden_locale) for forbidden_locale in FORBIDDEN_LOCALES)]
             print(self.tts_voices)
         else:
             self.tts_voices = tts_voices
@@ -160,39 +161,52 @@ class AnkiDeckCreator:
         with tatoeba.get("links", langs, chunksize=100000) as reader:
             for chunk in reader:
                 chunk.to_sql("links", con=engine, index=False, if_exists="append")
-
-        ix = Index("ix_sentence_detailed_sentence_id", SentenceDetailed.sentence_id)
-        ix.create(engine)
-        ix = Index("ix_sentence_detailed_username", SentenceDetailed.username)
-        ix.create(engine)
+        # https://stackoverflow.com/questions/55271904/sqlalchemy-with-multiple-databases-and-error-due-to-duplicate-index-creation
+        # Is this bugged because of this? Damn ORMs, are you even serious...
+        #ix = Index("ix_sentence_detailed_sentence_id", SentenceDetailed.sentence_id)
+        #ix.create(engine)
+        # Do it manually
+        engine.execute("CREATE INDEX ix_sentence_detailed_sentence_id ON sentences_detailed (sentence_id)")
+        #ix = Index("ix_sentence_detailed_username", SentenceDetailed.username)
+        #ix.create(engine)
+        engine.execute("CREATE INDEX ix_sentence_detailed_username ON sentences_detailed (username)")
         # sentencedetailed lang index
-        ix = Index("ix_sentences_detailed_lang", SentenceDetailed.lang)
-        ix.create(engine)
+        #ix = Index("ix_sentences_detailed_lang", SentenceDetailed.lang)
+        #ix.create(engine)
+        engine.execute("CREATE INDEX ix_sentences_detailed_lang ON sentences_detailed (lang)")
         # links translation_id index
-        ix = Index("ix_links_translation_id", Link.translation_id)
-        ix.create(engine)
+        #ix = Index("ix_links_translation_id", Link.translation_id)
+        #ix.create(engine)
+        engine.execute("CREATE INDEX ix_links_translation_id ON links (translation_id)")
         # links sentence_id index
-        ix = Index("ix_links_sentence_id", Link.sentence_id)
-        ix.create(engine)
+        #ix = Index("ix_links_sentence_id", Link.sentence_id)
+        #ix.create(engine)
+        engine.execute("CREATE INDEX ix_links_sentence_id ON links (sentence_id)")
         # sentences_with_audio sentence_id index
-        ix = Index("ix_sentences_with_audio_sentence_id", SentenceWithAudio.sentence_id)
-        ix.create(engine)
+        #ix = Index("ix_sentences_with_audio_sentence_id", SentenceWithAudio.sentence_id)
+        #ix.create(engine)
+        engine.execute("CREATE INDEX ix_sentences_with_audio_sentence_id ON sentences_with_audio (sentence_id)")
         # user_languages username index
-        ix = Index("ix_user_languages_username", UserLanguage.username)
-        ix.create(engine)
+        #ix = Index("ix_user_languages_username", UserLanguage.username)
+        #ix.create(engine)
+        engine.execute("CREATE INDEX ix_user_languages_username ON user_languages (username)")
         # user_languages lang index
-        ix = Index("ix_user_languages_lang", UserLanguage.lang)
-        ix.create(engine)
+        #ix = Index("ix_user_languages_lang", UserLanguage.lang)
+        #ix.create(engine)
+        engine.execute("CREATE INDEX ix_user_languages_lang ON user_languages (lang)")
         # user_languages skill_level index
-        ix = Index("ix_user_languages_skill_level", UserLanguage.skill_level)
-        ix.create(engine)
+        #ix = Index("ix_user_languages_skill_level", UserLanguage.skill_level)
+        #ix.create(engine)
+        engine.execute("CREATE INDEX ix_user_languages_skill_level ON user_languages (skill_level)")
 
         # tags sentence_id index
-        ix = Index("ix_tags_sentence_id", Tag.sentence_id)
-        ix.create(engine)
+        #ix = Index("ix_tags_sentence_id", Tag.sentence_id)
+        #ix.create(engine)
+        engine.execute("CREATE INDEX ix_tags_sentence_id ON tags (sentence_id)")
         # tags tag_name index
-        ix = Index("ix_tags_tag_name", Tag.tag_name)
-        ix.create(engine)
+        #ix = Index("ix_tags_tag_name", Tag.tag_name)
+        #ix.create(engine)
+        engine.execute("CREATE INDEX ix_tags_tag_name ON tags (tag_name)")
 
         # Drop duplicate sentence_id rows
         self.conn = sqlite3.connect(self.database_name)
@@ -569,3 +583,7 @@ The deck has been created with my open source program [tatoeba-to-anki](https://
         with open(f"{self.deck_output_path}.ankiweb_info", "w") as f:
             f.write(f"title: {title}\n")
             f.write(f"description: {description}\n")
+
+if __name__ == "__main__":
+    voices = ["de-AT-IngridNeural", "de-CH-LeniNeural", "test"]
+    print([voice for voice in voices if not any(voice.startswith(forbidden_locale) for forbidden_locale in FORBIDDEN_LOCALES)])

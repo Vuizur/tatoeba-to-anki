@@ -26,3 +26,4 @@ Add a lemmatizer so that the dictionary does not have to do it
 
 Add more dictionaries, so that we can get Spanish definitions for English words, for example.
 
+PROMOTE on Tatoeba
