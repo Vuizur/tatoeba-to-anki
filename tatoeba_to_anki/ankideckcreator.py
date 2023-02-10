@@ -424,8 +424,12 @@ class AnkiDeckCreator:
         self.cur.execute("COMMIT")
 
     def download_tabfile_dictionary(self):
+        if self.source_language_code == "ell":
+            source_language = "Greek" # Kaikki does not like the "Modern Greek (1453-)" language name
+        else:
+            source_language = self.source_language
         dictionary_creator = DictionaryCreator(
-            self.source_language, self.target_language
+            source_language, self.target_language
         )
         dictionary_creator.download_data_from_kaikki()
         dictionary_creator.create_database()
