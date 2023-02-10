@@ -28,7 +28,7 @@ class AllDeckCreator:
         # Sort the languages alphabetically
         langs.sort()
         for lang in langs:
-            if lang in self.langs_already_done and lang != "en":
+            if lang in self.langs_already_done or lang == "en":
                 continue
             if lang == "ms":
                 continue #TODO There are some issues with language codes, must investivate 
