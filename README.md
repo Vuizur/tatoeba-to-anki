@@ -2,7 +2,8 @@
 
 <img src="https://raw.githubusercontent.com/Vuizur/tatoeba-to-anki/main/img/anki_screenshot.png" width="50%" class="center">
 
-Download the [already generated dictionaries here](). (Currently for some languages, more will follow!)
+
+
 ------
 
 This project creates Anki flashcards from a Tatoeba language pair, ordering the cards by difficulty, downloading audio from Tatoeba (and high-quality Text-To-Speech if the native audio is not available) and reducing the card number to a set maximum.
