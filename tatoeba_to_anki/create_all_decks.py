@@ -28,12 +28,15 @@ class AllDeckCreator:
         # Sort the languages alphabetically
         langs.sort()
         for lang in langs:
+            print(lang)
             if lang in self.langs_already_done or lang == "en":
                 continue
             if lang == "ms":
                 continue #TODO There are some issues with language codes, must investivate 
-            print(lang)
-            lang_name = pycountry.languages.get(alpha_2=lang).name
+            if lang == "fa": # Persian
+                lang_name = pycountry.languages.get(alpha_3="pes").name # This is Iranian Persian. The only thing supported by Tatoeba
+            else:
+                lang_name = pycountry.languages.get(alpha_2=lang).name
             adc = AnkiDeckCreator(
                 lang_name,
                 "English",

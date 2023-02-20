@@ -66,9 +66,14 @@ class AnkiDeckCreator:
         self.target_language_code = pycountry.languages.get(
             name=self.target_language
         ).alpha_3
+        
+        
+        if self.source_language == "Iranian Persian":
+            self.source_language_code2 = "fa" # This doesn't work using pycountry
+        else:
+            self.source_language_code2 = pycountry.languages.get(name=self.source_language).alpha_2
 
-        # self.deck_id = deck_id
-        # self.model_id = model_id
+
         if not in_memory_database:
             self.database_name = (
                 f"{self.source_language_code}_{self.target_language_code}.sqlite"
@@ -79,8 +84,7 @@ class AnkiDeckCreator:
         self.download_mode = audio_download_mode
 
         if tts_voices is None:
-            lang_code = pycountry.languages.get(name=self.source_language).alpha_2
-            self.tts_voices = [voice for voice in get_available_voices(lang_code) if not any(voice.startswith(forbidden_locale) for forbidden_locale in FORBIDDEN_LOCALES)]
+            self.tts_voices = [voice for voice in get_available_voices(self.source_language_code2) if not any(voice.startswith(forbidden_locale) for forbidden_locale in FORBIDDEN_LOCALES)]
             print(self.tts_voices)
         else:
             self.tts_voices = tts_voices
@@ -393,9 +397,9 @@ class AnkiDeckCreator:
         # Adds a column to the sentences_detailed table which contains the word frequency of the sentence
 
         # Calculate the IETF BCP 47 language code
-        source_language_ietf_code = pycountry.languages.get(
-            name=self.source_language
-        ).alpha_2
+        #source_language_ietf_code = pycountry.languages.get(
+        #    name=self.source_language
+        #).alpha_2
 
         self.cur.execute(
             """ALTER TABLE sentences_detailed ADD COLUMN frequency INTEGER"""
@@ -410,7 +414,7 @@ class AnkiDeckCreator:
         sentences = self.cur.fetchall()
         for sentence in sentences:
             frequency = get_sentence_word_frequency(
-                sentence[1], source_language_ietf_code
+                sentence[1], self.source_language_code2
             )
             self.cur.execute(
                 """UPDATE sentences_detailed SET frequency = ? WHERE sentence_id = ?""",
@@ -426,6 +430,8 @@ class AnkiDeckCreator:
     def download_tabfile_dictionary(self):
         if self.source_language_code == "ell":
             source_language = "Greek" # Kaikki does not like the "Modern Greek (1453-)" language name
+        elif self.source_language_code == "pes":
+            source_language = "Persian" # Kaikki does not know Iranian Persian
         else:
             source_language = self.source_language
         dictionary_creator = DictionaryCreator(
@@ -492,9 +498,9 @@ class AnkiDeckCreator:
         )
 
         # Generate ietf language code
-        source_language_ietf_code = pycountry.languages.get(
-            name=self.source_language
-        ).alpha_2
+        #source_language_ietf_code = pycountry.languages.get(
+        #    name=self.source_language
+        #).alpha_2
 
         package = genanki.Package(deck)
 
@@ -527,7 +533,7 @@ class AnkiDeckCreator:
 
         for source_sentence_id, source_sentence, translation, audio_id in sentences:
             if self.dictionary_tabfile_path is not None:
-                target_sentence_html = f"{html.escape(translation)}{generate_dictionary_html(source_sentence, tabfile_dictionary, source_language_ietf_code)}"
+                target_sentence_html = f"{html.escape(translation)}{generate_dictionary_html(source_sentence, tabfile_dictionary, self.source_language_code2)}"
             else:
                 target_sentence_html = f"{html.escape(translation)}"
             if (
