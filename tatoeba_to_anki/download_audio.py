@@ -23,7 +23,7 @@ def get_available_voices(language_code: str, gender: str = "Female") -> list[str
     available_voices = asyncio.get_event_loop().run_until_complete(
         get_correct_voices(language=language_code, gender=gender)
     )
-    return [voice["ShortName"] for voice in available_voices]
+    return [voice["Name"] for voice in available_voices]
 
 async def all_langs() -> list[str]:
     voices = await VoicesManager.create()
