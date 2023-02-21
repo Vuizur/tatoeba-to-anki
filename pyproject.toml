@@ -14,6 +14,8 @@ python = "^3.8, <3.11" # Tatoebatools is not compatible with Python 3.11 yet
 tabfile-dictionary = {git = "https://github.com/Vuizur/tabfile-dictionary"}
 tatoebatools = ">=0.2.1"
 wordfreq = {extras = ["cjk"], version = ">=3.0.2"}
+pygithub = "^1.58.0"
+python-dotenv = "^0.21.1"
 
 [tool.poetry.dev-dependencies]
 black = {version = "^22.3.0", allow-prereleases = true}
