@@ -44,3 +44,4 @@ lat_eng.txt
 *.ankiweb_info
 *.txt
 *.db-journal
+.env
