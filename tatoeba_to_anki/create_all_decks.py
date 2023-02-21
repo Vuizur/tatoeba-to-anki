@@ -31,10 +31,12 @@ class AllDeckCreator:
             print(lang)
             if lang in self.langs_already_done or lang == "en":
                 continue
-            if lang == "ms":
+            elif lang == "ms":
                 continue #TODO There are some issues with language codes, must investivate 
-            if lang == "fa": # Persian
+            elif lang == "fa": # Persian
                 lang_name = pycountry.languages.get(alpha_3="pes").name # This is Iranian Persian. The only thing supported by Tatoeba
+            elif lang == "fil":
+                lang_name = pycountry.languages.get(alpha_3="fil").name
             else:
                 lang_name = pycountry.languages.get(alpha_2=lang).name
             adc = AnkiDeckCreator(

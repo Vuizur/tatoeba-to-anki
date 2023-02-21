@@ -60,9 +60,12 @@ class AnkiDeckCreator:
         self.target_language = target_language
         # Convert the source language ("English") to the language code ("eng")
         # using pycountry
-        self.source_language_code = pycountry.languages.get(
-            name=self.source_language
-        ).alpha_3
+        if self.source_language == "Filipino":
+            self.source_language_code = "tgl" # This is what Tatoeba uses
+        else:
+            self.source_language_code = pycountry.languages.get(
+                name=self.source_language
+            ).alpha_3
         self.target_language_code = pycountry.languages.get(
             name=self.target_language
         ).alpha_3
@@ -70,6 +73,8 @@ class AnkiDeckCreator:
         
         if self.source_language == "Iranian Persian":
             self.source_language_code2 = "fa" # This doesn't work using pycountry
+        elif self.source_language == "Filipino":
+            self.source_language_code2 = "fil" # This is what Edge TTS uses
         else:
             self.source_language_code2 = pycountry.languages.get(name=self.source_language).alpha_2
 
@@ -432,6 +437,8 @@ class AnkiDeckCreator:
             source_language = "Greek" # Kaikki does not like the "Modern Greek (1453-)" language name
         elif self.source_language_code == "pes":
             source_language = "Persian" # Kaikki does not know Iranian Persian
+        elif self.source_language_code == "tgl":
+            source_language = "Tagalog"
         else:
             source_language = self.source_language
         dictionary_creator = DictionaryCreator(
