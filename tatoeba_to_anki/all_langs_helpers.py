@@ -2,7 +2,6 @@ from wordfreq import available_languages
 
 from tatoeba_to_anki.download_audio import get_all_languages
 
-#TODO: Pay attention to special case with fil and tl
 
 def get_all_langs_that_have_voice_and_word_frequency() -> list[str]:
     """Get all languages that have a voice and word frequency."""

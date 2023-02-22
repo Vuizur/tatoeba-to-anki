@@ -1,6 +1,6 @@
 import wordfreq
 
-#from tabfiledictionary import SimpleTabfileDictionary
+# from tabfiledictionary import SimpleTabfileDictionary
 from tabfile_dictionary.dictionary import TabfileDictionary
 
 
@@ -17,6 +17,7 @@ def generate_wiktionary_link_html(
         html += f"<a href='{wiktionary_base_url}{token}#{wiktionary_source_language}'>{token}</a> "
     html += "</p>"
     return html
+
 
 def generate_dictionary_html(
     sentence: str,

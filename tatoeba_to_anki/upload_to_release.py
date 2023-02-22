@@ -37,4 +37,3 @@ for asset in release.get_assets():
 # Now upload all files in the current directory
 for file in glob.glob("*.apkg"):
     release.upload_asset(file)
-    

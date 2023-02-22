@@ -13,32 +13,41 @@ async def download_edge(text: str, voice: str, output_path: str) -> None:
     communicate = edge_tts.Communicate(text, voice)
     await communicate.save(output_path)
 
+
 async def get_correct_voices(language: str, gender: str) -> list[str]:
     voices = await VoicesManager.create()
     return voices.find(Language=language, Gender=gender)
 
-def get_available_voices(language_code: str, gender: str = "Female") -> list[str]: # We choose random female voices -> Only one gender because otherwise people would get confused that gender-specific
-    """The language code has to be 2 letters long."""                              # sentences get voiced by the wrong gender
+
+def get_available_voices(
+    language_code: str, gender: str = "Female"
+) -> list[
+    str
+]:  # We choose random female voices -> Only one gender because otherwise people would get confused that gender-specific
+    """The language code has to be 2 letters long."""  # sentences randomly get voiced by the wrong gender
 
     available_voices = asyncio.get_event_loop().run_until_complete(
         get_correct_voices(language=language_code, gender=gender)
     )
     return [voice["Name"] for voice in available_voices]
 
+
 async def all_langs() -> list[str]:
     voices = await VoicesManager.create()
     return voices.find()
 
+
 def get_all_languages() -> list[str]:
     """Get all voices."""
     voices: dict = asyncio.get_event_loop().run_until_complete(
-        all_langs() # type: ignore
+        all_langs()  # type: ignore
     )
     # Find all unique language keys
     languages = set()
     for voice in voices:
         languages.add(voice["Language"])
     return list(languages)
+
 
 @dataclass
 class Sentence:
@@ -157,7 +166,7 @@ class AudioDownloader:
 
 if __name__ == "__main__":
 
-    #print(get_available_voices("es", "Female"))
+    # print(get_available_voices("es", "Female"))
     print(get_all_languages())
 
     quit()

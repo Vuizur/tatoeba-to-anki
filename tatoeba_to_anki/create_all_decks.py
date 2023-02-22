@@ -32,9 +32,11 @@ class AllDeckCreator:
             if lang in self.langs_already_done or lang == "en":
                 continue
             elif lang == "ms":
-                continue #TODO There are some issues with language codes, must investivate 
-            elif lang == "fa": # Persian
-                lang_name = pycountry.languages.get(alpha_3="pes").name # This is Iranian Persian. The only thing supported by Tatoeba
+                continue  # TODO There are some issues with language codes, must investivate
+            elif lang == "fa":  # Persian
+                lang_name = pycountry.languages.get(
+                    alpha_3="pes"
+                ).name  # This is Iranian Persian. The only thing supported by Tatoeba
             elif lang == "fil":
                 lang_name = pycountry.languages.get(alpha_3="fil").name
             else:

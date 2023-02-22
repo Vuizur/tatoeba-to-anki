@@ -24,16 +24,24 @@ from tatoebatools.models import (
 from tatoeba_to_anki.generate_anki_deck import generate_dictionary_html
 from tabfile_dictionary import TabfileDictionary
 from tatoeba_to_anki.prune_sentences import delete_punctuation
-from tatoeba_to_anki.download_audio import AudioDownloader, DownloadMode, Sentence, get_available_voices
+from tatoeba_to_anki.download_audio import (
+    AudioDownloader,
+    DownloadMode,
+    Sentence,
+    get_available_voices,
+)
 
-FORBIDDEN_LOCALES = ["de-CH"] # Sorry friends from Switzerland
+FORBIDDEN_LOCALES = ["de-CH"]  # Sorry friends from Switzerland
+
 
 class AnkiDeckCreator:
     def __init__(
         self,
         source_language: str,
         target_language: str,
-        tts_voices: str | list[str] | None = None, # Will be figured out by the program if None
+        tts_voices: str
+        | list[str]
+        | None = None,  # Will be figured out by the program if None
         outdated_tags: list[str] = ["outdated, old-fashioned"],
         audio_folder="audio",
         dictionary_tabfile_path=None,
@@ -61,7 +69,7 @@ class AnkiDeckCreator:
         # Convert the source language ("English") to the language code ("eng")
         # using pycountry
         if self.source_language == "Filipino":
-            self.source_language_code = "tgl" # This is what Tatoeba uses
+            self.source_language_code = "tgl"  # This is what Tatoeba uses
         else:
             self.source_language_code = pycountry.languages.get(
                 name=self.source_language
@@ -69,15 +77,15 @@ class AnkiDeckCreator:
         self.target_language_code = pycountry.languages.get(
             name=self.target_language
         ).alpha_3
-        
-        
-        if self.source_language == "Iranian Persian":
-            self.source_language_code2 = "fa" # This doesn't work using pycountry
-        elif self.source_language == "Filipino":
-            self.source_language_code2 = "fil" # This is what Edge TTS uses
-        else:
-            self.source_language_code2 = pycountry.languages.get(name=self.source_language).alpha_2
 
+        if self.source_language == "Iranian Persian":
+            self.source_language_code2 = "fa"  # This doesn't work using pycountry
+        elif self.source_language == "Filipino":
+            self.source_language_code2 = "fil"  # This is what Edge TTS uses
+        else:
+            self.source_language_code2 = pycountry.languages.get(
+                name=self.source_language
+            ).alpha_2
 
         if not in_memory_database:
             self.database_name = (
@@ -89,7 +97,14 @@ class AnkiDeckCreator:
         self.download_mode = audio_download_mode
 
         if tts_voices is None:
-            self.tts_voices = [voice for voice in get_available_voices(self.source_language_code2) if not any(voice.startswith(forbidden_locale) for forbidden_locale in FORBIDDEN_LOCALES)]
+            self.tts_voices = [
+                voice
+                for voice in get_available_voices(self.source_language_code2)
+                if not any(
+                    voice.startswith(forbidden_locale)
+                    for forbidden_locale in FORBIDDEN_LOCALES
+                )
+            ]
             print(self.tts_voices)
         else:
             self.tts_voices = tts_voices
@@ -172,49 +187,61 @@ class AnkiDeckCreator:
                 chunk.to_sql("links", con=engine, index=False, if_exists="append")
         # https://stackoverflow.com/questions/55271904/sqlalchemy-with-multiple-databases-and-error-due-to-duplicate-index-creation
         # Is this bugged because of this? Damn ORMs, are you even serious...
-        #ix = Index("ix_sentence_detailed_sentence_id", SentenceDetailed.sentence_id)
-        #ix.create(engine)
+        # ix = Index("ix_sentence_detailed_sentence_id", SentenceDetailed.sentence_id)
+        # ix.create(engine)
         # Do it manually
-        engine.execute("CREATE INDEX ix_sentence_detailed_sentence_id ON sentences_detailed (sentence_id)")
-        #ix = Index("ix_sentence_detailed_username", SentenceDetailed.username)
-        #ix.create(engine)
-        engine.execute("CREATE INDEX ix_sentence_detailed_username ON sentences_detailed (username)")
+        engine.execute(
+            "CREATE INDEX ix_sentence_detailed_sentence_id ON sentences_detailed (sentence_id)"
+        )
+        # ix = Index("ix_sentence_detailed_username", SentenceDetailed.username)
+        # ix.create(engine)
+        engine.execute(
+            "CREATE INDEX ix_sentence_detailed_username ON sentences_detailed (username)"
+        )
         # sentencedetailed lang index
-        #ix = Index("ix_sentences_detailed_lang", SentenceDetailed.lang)
-        #ix.create(engine)
-        engine.execute("CREATE INDEX ix_sentences_detailed_lang ON sentences_detailed (lang)")
+        # ix = Index("ix_sentences_detailed_lang", SentenceDetailed.lang)
+        # ix.create(engine)
+        engine.execute(
+            "CREATE INDEX ix_sentences_detailed_lang ON sentences_detailed (lang)"
+        )
         # links translation_id index
-        #ix = Index("ix_links_translation_id", Link.translation_id)
-        #ix.create(engine)
+        # ix = Index("ix_links_translation_id", Link.translation_id)
+        # ix.create(engine)
         engine.execute("CREATE INDEX ix_links_translation_id ON links (translation_id)")
         # links sentence_id index
-        #ix = Index("ix_links_sentence_id", Link.sentence_id)
-        #ix.create(engine)
+        # ix = Index("ix_links_sentence_id", Link.sentence_id)
+        # ix.create(engine)
         engine.execute("CREATE INDEX ix_links_sentence_id ON links (sentence_id)")
         # sentences_with_audio sentence_id index
-        #ix = Index("ix_sentences_with_audio_sentence_id", SentenceWithAudio.sentence_id)
-        #ix.create(engine)
-        engine.execute("CREATE INDEX ix_sentences_with_audio_sentence_id ON sentences_with_audio (sentence_id)")
+        # ix = Index("ix_sentences_with_audio_sentence_id", SentenceWithAudio.sentence_id)
+        # ix.create(engine)
+        engine.execute(
+            "CREATE INDEX ix_sentences_with_audio_sentence_id ON sentences_with_audio (sentence_id)"
+        )
         # user_languages username index
-        #ix = Index("ix_user_languages_username", UserLanguage.username)
-        #ix.create(engine)
-        engine.execute("CREATE INDEX ix_user_languages_username ON user_languages (username)")
+        # ix = Index("ix_user_languages_username", UserLanguage.username)
+        # ix.create(engine)
+        engine.execute(
+            "CREATE INDEX ix_user_languages_username ON user_languages (username)"
+        )
         # user_languages lang index
-        #ix = Index("ix_user_languages_lang", UserLanguage.lang)
-        #ix.create(engine)
+        # ix = Index("ix_user_languages_lang", UserLanguage.lang)
+        # ix.create(engine)
         engine.execute("CREATE INDEX ix_user_languages_lang ON user_languages (lang)")
         # user_languages skill_level index
-        #ix = Index("ix_user_languages_skill_level", UserLanguage.skill_level)
-        #ix.create(engine)
-        engine.execute("CREATE INDEX ix_user_languages_skill_level ON user_languages (skill_level)")
+        # ix = Index("ix_user_languages_skill_level", UserLanguage.skill_level)
+        # ix.create(engine)
+        engine.execute(
+            "CREATE INDEX ix_user_languages_skill_level ON user_languages (skill_level)"
+        )
 
         # tags sentence_id index
-        #ix = Index("ix_tags_sentence_id", Tag.sentence_id)
-        #ix.create(engine)
+        # ix = Index("ix_tags_sentence_id", Tag.sentence_id)
+        # ix.create(engine)
         engine.execute("CREATE INDEX ix_tags_sentence_id ON tags (sentence_id)")
         # tags tag_name index
-        #ix = Index("ix_tags_tag_name", Tag.tag_name)
-        #ix.create(engine)
+        # ix = Index("ix_tags_tag_name", Tag.tag_name)
+        # ix.create(engine)
         engine.execute("CREATE INDEX ix_tags_tag_name ON tags (tag_name)")
 
         # Drop duplicate sentence_id rows
@@ -266,7 +293,7 @@ class AnkiDeckCreator:
 
     def delete_sentences_over_max_sentence_number(
         self,  # , prefer_sentences_where_audio_already_has_been_downloaded=True
-    )-> None:
+    ) -> None:
         # TODO: Fix this
         unique_words: set[str] = set()
         sentences_that_contain_unique_words: set[int] = set()
@@ -402,9 +429,9 @@ class AnkiDeckCreator:
         # Adds a column to the sentences_detailed table which contains the word frequency of the sentence
 
         # Calculate the IETF BCP 47 language code
-        #source_language_ietf_code = pycountry.languages.get(
+        # source_language_ietf_code = pycountry.languages.get(
         #    name=self.source_language
-        #).alpha_2
+        # ).alpha_2
 
         self.cur.execute(
             """ALTER TABLE sentences_detailed ADD COLUMN frequency INTEGER"""
@@ -434,16 +461,16 @@ class AnkiDeckCreator:
 
     def download_tabfile_dictionary(self):
         if self.source_language_code == "ell":
-            source_language = "Greek" # Kaikki does not like the "Modern Greek (1453-)" language name
+            source_language = (
+                "Greek"  # Kaikki does not like the "Modern Greek (1453-)" language name
+            )
         elif self.source_language_code == "pes":
-            source_language = "Persian" # Kaikki does not know Iranian Persian
+            source_language = "Persian"  # Kaikki does not know Iranian Persian
         elif self.source_language_code == "tgl":
             source_language = "Tagalog"
         else:
             source_language = self.source_language
-        dictionary_creator = DictionaryCreator(
-            source_language, self.target_language
-        )
+        dictionary_creator = DictionaryCreator(source_language, self.target_language)
         dictionary_creator.download_data_from_kaikki()
         dictionary_creator.create_database()
         dictionary_creator.export_to_tabfile(tabfile_path=self.dictionary_tabfile_path)
@@ -505,9 +532,9 @@ class AnkiDeckCreator:
         )
 
         # Generate ietf language code
-        #source_language_ietf_code = pycountry.languages.get(
+        # source_language_ietf_code = pycountry.languages.get(
         #    name=self.source_language
-        #).alpha_2
+        # ).alpha_2
 
         package = genanki.Package(deck)
 
@@ -583,7 +610,7 @@ class AnkiDeckCreator:
         self.generate_anki_deck()
 
     # Close the database connection when the object is garbage collected (Note: this might be buggy)
-    #def __del__(self):
+    # def __del__(self):
     #    self.conn.commit()
     #    self.conn.close()
 
@@ -601,6 +628,16 @@ The deck has been created with my open source program [tatoeba-to-anki](https://
             f.write(f"title: {title}\n")
             f.write(f"description: {description}\n")
 
+
 if __name__ == "__main__":
     voices = ["de-AT-IngridNeural", "de-CH-LeniNeural", "test"]
-    print([voice for voice in voices if not any(voice.startswith(forbidden_locale) for forbidden_locale in FORBIDDEN_LOCALES)])
+    print(
+        [
+            voice
+            for voice in voices
+            if not any(
+                voice.startswith(forbidden_locale)
+                for forbidden_locale in FORBIDDEN_LOCALES
+            )
+        ]
+    )
