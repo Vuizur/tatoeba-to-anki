@@ -31,7 +31,7 @@ class AllDeckCreator:
             print(lang)
             if lang in self.langs_already_done or lang == "en":
                 continue
-            elif lang == "ms":
+            elif lang == "ms" or lang == "lv":
                 continue  # TODO There are some issues with language codes, must investivate
             elif lang == "fa":  # Persian
                 lang_name = pycountry.languages.get(
