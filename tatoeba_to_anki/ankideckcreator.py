@@ -70,6 +70,8 @@ class AnkiDeckCreator:
         # using pycountry
         if self.source_language == "Filipino":
             self.source_language_code = "tgl"  # This is what Tatoeba uses
+        elif self.source_language == "Chinese":
+            self.source_language_code = "cmn"  # This is what Tatoeba uses
         else:
             self.source_language_code = pycountry.languages.get(
                 name=self.source_language
