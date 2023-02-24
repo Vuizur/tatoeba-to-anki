@@ -33,6 +33,8 @@ class AllDeckCreator:
                 continue
             elif lang == "ms" or lang == "lv":
                 continue  # TODO There are some issues with language codes, must investivate
+            elif lang == "sv":
+                continue # Here the dictionary is not working yet
             elif lang == "fa":  # Persian
                 lang_name = pycountry.languages.get(
                     alpha_3="pes"
