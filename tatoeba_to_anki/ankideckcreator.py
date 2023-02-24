@@ -468,6 +468,8 @@ class AnkiDeckCreator:
             source_language = "Persian"  # Kaikki does not know Iranian Persian
         elif self.source_language_code == "tgl":
             source_language = "Tagalog"
+        elif self.source_language_code == "slv":
+            source_language = "Slovene"
         else:
             source_language = self.source_language
         dictionary_creator = DictionaryCreator(source_language, self.target_language)
