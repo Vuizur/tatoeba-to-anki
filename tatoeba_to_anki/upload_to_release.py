@@ -27,7 +27,7 @@ if release is None:
     release = repo.create_git_release(
         "latest",
         "latest",
-        "latest",
+        "The latest flashcard decks for all languages.",
         draft=False,
         prerelease=False,
     )
@@ -37,7 +37,10 @@ for asset in release.get_assets():
     asset.delete_asset()
 print("Deleted all files in the release")
 
+print(f"Uploading {len(glob.glob('*.apkg'))} files to the release...")
+
 # Now upload all files in the current directory
 for file in glob.glob("*.apkg"):
     print(f"Uploading {file}")
     release.upload_asset(file)
+    print(f"Finished uploading {file}")
