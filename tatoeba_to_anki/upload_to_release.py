@@ -18,10 +18,12 @@ repo = g.get_repo("Vuizur/tatoeba-to-anki")
 release = None
 for r in repo.get_releases():
     if r.title == "latest":
+        print("Found a release with the name 'latest'")
         release = r
         break
 
 if release is None:
+    print("Creating a new release")
     release = repo.create_git_release(
         "latest",
         "latest",
@@ -33,7 +35,9 @@ if release is None:
 # Now delete all files in the release
 for asset in release.get_assets():
     asset.delete_asset()
+print("Deleted all files in the release")
 
 # Now upload all files in the current directory
 for file in glob.glob("*.apkg"):
+    print(f"Uploading {file}")
     release.upload_asset(file)
