@@ -1,7 +1,7 @@
 # Tatoeba to Anki sentence pair flash card creator
-<center>
-<img src="https://raw.githubusercontent.com/Vuizur/tatoeba-to-anki/main/img/screenshot1.png" width="50%" class="center">
-</center>
+<p align="center">
+<img src="https://raw.githubusercontent.com/Vuizur/tatoeba-to-anki/main/img/screenshot1.png" width="50%">
+</p>
 
 [Download decks for 39 languages here](https://github.com/Vuizur/tatoeba-to-anki/releases/tag/latest)! 
 
