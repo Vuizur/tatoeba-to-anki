@@ -45,3 +45,7 @@ lat_eng.txt
 *.txt
 *.db-journal
 .env
+upload-ts/build/
+upload-ts/node_modules/
+tatoeba_to_anki/upload_release.sh
+upload_release.sh
