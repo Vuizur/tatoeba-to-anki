@@ -37,6 +37,12 @@ The parameter tts_voices is one (or a list) of the Edge TTS voices. For choosing
 
 I plan on adding more features, you can open an issue if you think something should be changed/improved or send a pull request.
 
+### Attribution
+
+All the sentences come from the [Tatoeba corpus](https://tatoeba.org) and are available under the [CC-BY 2.0 FR](https://creativecommons.org/licenses/by/2.0/fr/).
+
+The definitions come from [Wiktionary](https://en.wiktionary.org/wiki/Wiktionary:Main_Page) and are available under the [Creative Commons Attribution-ShareAlike 3.0 Unported License](https://creativecommons.org/licenses/by-sa/3.0/)
+
 ### Acknowledgements
 I thank the authors of the Tatoeba project, LBeaudoux (the creator of [TatoebaTools](https://github.com/LBeaudoux/tatoebatools)) and Tatu Ylonen and the other contributors of the Wiktextract project for their hard work.
 
