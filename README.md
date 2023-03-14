@@ -46,3 +46,5 @@ I thank the authors of the Tatoeba project, LBeaudoux (the creator of [TatoebaTo
 * [Sentence pairs](https://github.com/kmicklas/sentence-pairs) is a pretty simple package which has given me the idea of using the wordfreq package
 
 * Older solutions such as [Tatoeba-Ankigeneration](https://github.com/alexanderk409/Tatoeba-anki-deckgeneration) scrape parts of the site by themselves, but that is not necessary anymore with the new downloadable data
+
+* Interesting article: https://digitalwords.net/anki/tatoeba-audio/index.eng.html
